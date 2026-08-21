@@ -81,9 +81,13 @@ def create_pattern(self, pattern: Pattern) -> int:
     with self.db.get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO PATTERN (pattern_name, designer)
+            INSERT INTO PATTERN (
+                pattern_name, designer
+            )
             VALUES (?, ?)
-        """, (pattern.pattern_name, pattern.designer))
+        """, (
+            pattern.pattern_name, pattern.designer
+        ))
         conn.commit()
         return cursor.lastrowid
 
@@ -162,11 +166,15 @@ def create_needle(self, needle: Needle) -> int:
     with self.db.get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO NEEDLE (needle_size_mm, needle_type, needle_material, 
-                                needle_length, needle_brand)
+            INSERT INTO NEEDLE (
+                needle_size_mm, needle_type, needle_material, 
+                needle_length, needle_brand
+            )
             VALUES (?, ?, ?, ?, ?)
-        """, (needle.needle_size_mm, needle.needle_type, 
-                needle.needle_material, needle.needle_length, needle.needle_brand))
+        """, (
+            needle.needle_size_mm, needle.needle_type, needle.needle_material,
+            needle.needle_length, needle.needle_brand
+        ))
         conn.commit()
         return cursor.lastrowid
     
@@ -191,7 +199,63 @@ def get_all_needles(self) -> List[Needle]:
 
 # ============ YARN OPERATIONS ============
 
-
+def create_yarn(self, yarn: Yarn) -> int:
+    """
+    Insert a new yarn into the database.
+    
+    Args:
+        yarn: A Yarn dataclass instance with yarn details.
+              Requires yarn_brand. All other fields are optional.
+    
+    Returns:
+        int: The auto-generated yarn_id of the newly created yarn.
+    
+    Raises:
+        sqlite3.IntegrityError: If yarn_brand is NULL or constraints are violated.
+    
+    Example:
+        yarn = Yarn(
+            yarn_brand="Malabrigo",
+            yarn_line="Rios",
+            colour_name="Whale's Road",
+            weight_category="Worsted",
+            total_yardage=210
+        )
+        yarn_id = tracker.create_yarn(yarn)
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO YARN (
+                yarn_brand, yarn_line, colour_name, dye_lot, 
+                weight_category, total_yardage
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            yarn.yarn_brand, yarn.yarn_line, yarn.colour_name, yarn.dye_lot,
+            yarn.weight_category, yarn.total_yardage
+        ))
+        conn.commit()
+        return cursor.lastrowid
+    
+def get_all_yarns(self) -> List[Yarn]:
+    """
+    Retrieve all yarns from the database, sorted by brand then line.
+    
+    Returns:
+        List[Yarn]: A list of all Yarn objects, ordered alphabetically
+                    by brand name, then by line name. Returns empty list if none.
+    
+    Example:
+        yarns = tracker.get_all_yarns()
+        for yarn in yarns:
+            print(f"{yarn.yarn_brand} {yarn.yarn_line} - {yarn.colour_name}")
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM YARN ORDER BY yarn_brand, yarn_line")
+        rows = cursor.fetchall()
+        return [Yarn(**dict(row)) for row in rows]
 
 # ============ PROJECT OPERATIONS ============
 
