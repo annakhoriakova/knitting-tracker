@@ -1,1 +1,2 @@
-sqlite3
+pytest
+pytest-cov  # For test coverage reports
