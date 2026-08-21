@@ -57,3 +57,21 @@ class KnittingTracker:
         (defaults to "data/knitting.db").
         """
         self.db = Database()
+
+# ============ PATTERN OPERATIONS ============
+
+
+
+# ============ NEEDLE OPERATIONS ============
+
+
+
+# ============ YARN OPERATIONS ============
+
+
+
+# ============ PROJECT OPERATIONS ============
+
+
+
+# ============ SEARCH & FILTER ============
