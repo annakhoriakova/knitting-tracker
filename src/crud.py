@@ -88,30 +88,49 @@ def create_pattern(self, pattern: Pattern) -> int:
         return cursor.lastrowid
 
 def get_pattern(self, pattern_id: int) -> Optional[Pattern]:
-        """
-        Retrieve a pattern from the database by its ID.
-        
-        Args:
-            pattern_id: The unique identifier of the pattern to retrieve.
-        
-        Returns:
-            Optional[Pattern]: A Pattern object if found, None if no pattern
-                               exists with the given ID.
-        
-        Example:
-            pattern = tracker.get_pattern(1)
-            if pattern:
-                print(f"Found pattern: {pattern.pattern_name}")
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM PATTERN WHERE pattern_id = ?", (pattern_id,))
-            row = cursor.fetchone()
-            if row:
-                # Convert the database row (sqlite3.Row) to a Pattern dataclass
-                # dict(row) converts the Row object to a dictionary mapping column names to values
-                return Pattern(**dict(row))
-            return None
+    """
+    Retrieve a pattern from the database by its ID.
+    
+    Args:
+        pattern_id: The unique identifier of the pattern to retrieve.
+    
+    Returns:
+        Optional[Pattern]: A Pattern object if found, None if no pattern
+                           exists with the given ID.
+    
+    Example:
+        pattern = tracker.get_pattern(1)
+        if pattern:
+            print(f"Found pattern: {pattern.pattern_name}")
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM PATTERN WHERE pattern_id = ?", (pattern_id,))
+        row = cursor.fetchone()
+        if row:
+            # Convert the database row (sqlite3.Row) to a Pattern dataclass
+            # dict(row) converts the Row object to a dictionary mapping column names to values
+            return Pattern(**dict(row))
+        return None
+
+def get_all_patterns(self) -> List[Pattern]:
+    """
+    Retrieve all patterns from the database, sorted alphabetically by name.
+    
+    Returns:
+        List[Pattern]: A list of all Pattern objects in the database.
+                       Returns an empty list if no patterns exist.
+    
+    Example:
+        all_patterns = tracker.get_all_patterns()
+        for pattern in all_patterns:
+            print(f"{pattern.pattern_name} by {pattern.designer}")
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM PATTERN ORDER BY pattern_name")
+        rows = cursor.fetchall()
+        return [Pattern(**dict(row)) for row in rows]
 
 # ============ NEEDLE OPERATIONS ============
 
