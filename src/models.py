@@ -128,3 +128,17 @@ class Project:
     pattern_id: int = 0               # Foreign key to PATTERN table (required)
     needle_id: int = 0                # Foreign key to NEEDLE table (required)
     yarns: list = None                # List of Yarn objects (populated by database layer)
+
+def __post_init__(self):
+    """
+    Post-initialization hook that runs after the dataclass __init__.
+    
+    This ensures that yarns is always a list, even if it wasn't provided
+    during initialization. This prevents NoneType errors when iterating
+    over yarns in the application code.
+    
+    The database layer will populate this list when retrieving projects
+    that have associated yarns via the PROJECT_YARN junction table.
+    """
+    if self.yarns is None:
+        self.yarns = []
