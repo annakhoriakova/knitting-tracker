@@ -1,0 +1,7 @@
+-- ============================================================
+-- Knitting Project Tracker Database Schema
+-- Last Updated: 2026-08-21
+-- Author: Anna Khoriakova
+-- Description: Schema for tracking knitting projects,
+--              patterns, yarns, needles, and project-yarn relationships
+-- ============================================================
