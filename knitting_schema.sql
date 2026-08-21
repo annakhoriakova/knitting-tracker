@@ -7,6 +7,17 @@
 -- ============================================================
 
 -- ============================================================
+-- DROP TABLES (for clean re-runs)
+-- ============================================================
+-- Drop in reverse order of dependencies to avoid foreign key errors
+
+DROP TABLE IF EXISTS PROJECT_YARN;
+DROP TABLE IF EXISTS PROJECT;
+DROP TABLE IF EXISTS PATTERN;
+DROP TABLE IF EXISTS NEEDLE;
+DROP TABLE IF EXISTS YARN;
+
+-- ============================================================
 -- TABLES
 -- ============================================================
 
