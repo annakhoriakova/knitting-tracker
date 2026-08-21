@@ -60,7 +60,58 @@ class KnittingTracker:
 
 # ============ PATTERN OPERATIONS ============
 
+def create_pattern(self, pattern: Pattern) -> int:
+    """
+    Insert a new pattern into the database.
+    
+    Args:
+        pattern: A Pattern dataclass instance with pattern details.
+                 Must have pattern_name set; designer is optional.
+    
+    Returns:
+        int: The auto-generated pattern_id of the newly created pattern.
+    
+    Raises:
+        sqlite3.IntegrityError: If pattern_name is NULL or violates constraints.
+    
+    Example:
+        pattern = Pattern(pattern_name="Lace Shawl", designer="Jane Doe")
+        pattern_id = tracker.create_pattern(pattern)
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO PATTERN (pattern_name, designer)
+            VALUES (?, ?)
+        """, (pattern.pattern_name, pattern.designer))
+        conn.commit()
+        return cursor.lastrowid
 
+def get_pattern(self, pattern_id: int) -> Optional[Pattern]:
+        """
+        Retrieve a pattern from the database by its ID.
+        
+        Args:
+            pattern_id: The unique identifier of the pattern to retrieve.
+        
+        Returns:
+            Optional[Pattern]: A Pattern object if found, None if no pattern
+                               exists with the given ID.
+        
+        Example:
+            pattern = tracker.get_pattern(1)
+            if pattern:
+                print(f"Found pattern: {pattern.pattern_name}")
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM PATTERN WHERE pattern_id = ?", (pattern_id,))
+            row = cursor.fetchone()
+            if row:
+                # Convert the database row (sqlite3.Row) to a Pattern dataclass
+                # dict(row) converts the Row object to a dictionary mapping column names to values
+                return Pattern(**dict(row))
+            return None
 
 # ============ NEEDLE OPERATIONS ============
 
