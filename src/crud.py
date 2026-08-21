@@ -134,7 +134,60 @@ def get_all_patterns(self) -> List[Pattern]:
 
 # ============ NEEDLE OPERATIONS ============
 
-
+def create_needle(self, needle: Needle) -> int:
+    """
+    Insert a new needle into the database.
+    
+    Args:
+        needle: A Needle dataclass instance with needle details.
+                Requires needle_size_mm and needle_type.
+                Other fields (material, length, brand) are optional.
+    
+    Returns:
+        int: The auto-generated needle_id of the newly created needle.
+    
+    Raises:
+        sqlite3.IntegrityError: If required fields are NULL or constraints are violated.
+    
+    Example:
+        needle = Needle(
+            needle_size_mm=4.0,
+            needle_type="Circular",
+            needle_material="Metal",
+            needle_length="24",
+            needle_brand="KnitPro"
+        )
+        needle_id = tracker.create_needle(needle)
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO NEEDLE (needle_size_mm, needle_type, needle_material, 
+                                needle_length, needle_brand)
+            VALUES (?, ?, ?, ?, ?)
+        """, (needle.needle_size_mm, needle.needle_type, 
+                needle.needle_material, needle.needle_length, needle.needle_brand))
+        conn.commit()
+        return cursor.lastrowid
+    
+def get_all_needles(self) -> List[Needle]:
+    """
+    Retrieve all needles from the database, sorted by size.
+    
+    Returns:
+        List[Needle]: A list of all Needle objects, ordered by needle_size_mm
+                      (smallest to largest). Returns empty list if none exist.
+    
+    Example:
+        needles = tracker.get_all_needles()
+        for needle in needles:
+            print(f"Size {needle.needle_size_mm}mm - {needle.needle_type}")
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM NEEDLE ORDER BY needle_size_mm")
+        rows = cursor.fetchall()
+        return [Needle(**dict(row)) for row in rows]
 
 # ============ YARN OPERATIONS ============
 
