@@ -467,3 +467,32 @@ def add_yarn_to_project(self, project_id: int, yarn_id: int, skeins_used: int = 
         return True
 
 # ============ SEARCH & FILTER ============
+
+def get_active_projects(self) -> List[Project]:
+    """
+    Retrieve all active projects (Planning, WIP, or Blocking status).
+    
+    This is a convenience method for quickly viewing projects that are
+    currently in progress or planned, excluding finished or abandoned projects.
+    Projects are sorted with the most recently started first.
+    
+    Returns:
+        List[Project]: A list of active Project objects, sorted by start_date
+                       descending (newest first). Returns empty list if none.
+    
+    Example:
+        active = tracker.get_active_projects()
+        print(f"You have {len(active)} active projects:")
+        for project in active:
+            print(f"  {project.project_name} - {project.status}")
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        # Filter for projects that are not yet finished, frogged, or abandoned
+        cursor.execute("""
+            SELECT * FROM PROJECT 
+            WHERE status IN ('Planning', 'WIP', 'Blocking')
+            ORDER BY start_date DESC
+        """)
+        rows = cursor.fetchall()
+        return [Project(**dict(row)) for row in rows]
