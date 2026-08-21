@@ -11,7 +11,7 @@ The database layer works with the models defined in models.py
 and the CRUD operations in crud.py.
 
 Author: Anna Khoriakova
-Date: 2026-08-21
+Last Updated: 2026-08-21
 ============================================================
 """
 
