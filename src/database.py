@@ -33,7 +33,17 @@ class Database:
         Yields:
             sqlite3.Connection: An active database connection
         """
-
+        # Establish a connection to the SQLite database at the stored path
+        conn = sqlite3.connect(self.db_path)
+        # Set row_factory to sqlite3.Row so query results can be accessed by column name
+        conn.row_factory = sqlite3.Row
+        try:
+            # Yield the connection to the calling code
+            yield conn
+        finally:
+            # Close the database connection to free up resources
+            conn.close()
+                
     def _initialize_database(self):
         """Create tables if they don't exist
         
