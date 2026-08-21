@@ -2,6 +2,31 @@
 
 A SQL database schema for tracking knitting projects, patterns, yarn inventory, and needle collections. Designed for knitters who want to organize their projects and analyze their crafting habits.
 
+## Project Structure
+```
+knitting-tracker-sql/
+├── src/                     # Main source code directory
+│   ├── __init__.py
+│   ├── database.py          # Database connection & setup
+│   ├── models.py            # Data classes
+│   └── crud.py              # CRUD operations
+│
+├── tests/                   # Unit tests
+│   ├── __init__.py
+│   ├── test_database.py     # Test database connections
+│   ├── test_models.py       # Test data models
+│   └── test_crud.py         # Test CRUD operations
+│
+├── data/                    # Database files
+│   └── knitting.db          # SQLite database file
+│
+├── knitting_schema.sql      # Database schema
+├── requirements.txt         # Python dependencies
+├── .gitignore               # Git ignore file
+├── README.md                # Project overview
+└── main.py                  # Application entry point
+```
+
 ## Features
 
 - Track projects with start/end dates and status (Planning, WIP, Blocking, Finished, Frogged, Abandoned)
