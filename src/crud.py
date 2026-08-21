@@ -356,4 +356,114 @@ def get_project(self, project_id: int) -> Optional[Project]:
         
         return project
 
+def get_all_projects(self) -> List[Project]:
+    """
+    Retrieve all projects from the database, sorted by start date (newest first).
+    
+    This method returns the project details, not the associated yarns.
+    get_project() can be used to retrieve the yarn information for a specific project.
+    
+    Returns:
+        List[Project]: A list of all Project objects, with the most recent
+                       projects first. Returns empty list if no projects exist.
+    
+    Example:
+        all_projects = tracker.get_all_projects()
+        for project in all_projects:
+            print(f"{project.project_name} - {project.status}")
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM PROJECT ORDER BY start_date DESC")
+        rows = cursor.fetchall()
+        return [Project(**dict(row)) for row in rows]
+    
+def update_project_status(self, project_id: int, new_status: str) -> bool:
+    """
+    Update the status of an existing project.
+    
+    This method also automatically sets the end_date to the current date
+    when the status is changed to 'Finished'. This provides automatic
+    completion tracking without requiring a separate date update.
+    
+    Args:
+        project_id: The ID of the project to update.
+        new_status: The new status to set. Must be one of:
+                    'Planning', 'WIP', 'Blocking', 'Finished', 'Frogged', 'Abandoned'
+    
+    Returns:
+        bool: True if the project was found and updated, False if no project
+              was found with the given ID.
+    
+    Raises:
+        ValueError: If new_status is not one of the valid status values.
+    
+    Example:
+        # Mark a project as finished
+        if tracker.update_project_status(1, 'Finished'):
+            print("Project completed!")
+        
+        # Move a project to blocking (e.g., waiting for more yarn)
+        tracker.update_project_status(1, 'Blocking')
+    """
+    valid_statuses = ['Planning', 'WIP', 'Blocking', 'Finished', 'Frogged', 'Abandoned']
+    if new_status not in valid_statuses:
+        raise ValueError(f"Invalid status. Must be one of: {valid_statuses}")
+    
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        # Use a CASE statement to automatically set end_date when finished
+        cursor.execute("""
+            UPDATE PROJECT 
+            SET status = ?, 
+                end_date = CASE WHEN ? = 'Finished' THEN date('now') ELSE end_date END
+            WHERE project_id = ?
+        """, (new_status, new_status, project_id))
+        conn.commit()
+        # Return True if any rows were affected (i.e., project was found)
+        return cursor.rowcount > 0
+    
+def add_yarn_to_project(self, project_id: int, yarn_id: int, skeins_used: int = 1) -> bool:
+    """
+    Associate a yarn with a project in the PROJECT_YARN junction table.
+    
+    This allows tracking which yarns are used in a project and how many
+    skeins of each are needed/used. A project can have multiple yarns
+    (e.g., for stripes, colorwork, or using different yarns for different parts).
+    
+    Args:
+        project_id: The ID of the project to associate the yarn with.
+        yarn_id: The ID of the yarn to add to the project.
+        skeins_used: Number of skeins of this yarn used in the project.
+                     Must be > 0 (validated by database CHECK constraint).
+                     Defaults to 1 if not specified.
+    
+    Returns:
+        bool: True if the association was created successfully.
+    
+    Raises:
+        sqlite3.IntegrityError: If the project_id or yarn_id doesn't exist,
+                                or if the combination already exists
+                                (due to composite primary key constraint).
+    
+    Example:
+        # Use 3 skeins of Malabrigo Rios for a sweater
+        tracker.add_yarn_to_project(1, 5, 3)
+        
+        # Use 1 skein of a contrast color for stripes
+        tracker.add_yarn_to_project(1, 7, 1)
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO PROJECT_YARN (
+                project_id, yarn_id, skeins_used
+            )
+            VALUES (?, ?, ?)
+        """, (
+            project_id, yarn_id, skeins_used
+        ))
+        conn.commit()
+        return True
+
 # ============ SEARCH & FILTER ============
