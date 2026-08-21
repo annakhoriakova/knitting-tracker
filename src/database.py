@@ -18,17 +18,45 @@ class Database:
         Args:
             db_path: Path to the SQLite database file (default: "data/knitting.db")
         """
-
         # Store the database file path as an instance variable
         self.db_path = db_path
         # Call the internal method to create tables if they don't exist
         self._initialize_database()
 
     @contextmanager
+    def get_connection(self):
+        """Context manager for database connections
+        
+        This allows using 'with Database().get_connection() as conn:' syntax
+        which automatically handles opening and closing the connection.
+        
+        Yields:
+            sqlite3.Connection: An active database connection
+        """
+
     def _initialize_database(self):
         """Create tables if they don't exist
         
         This method reads the SQL schema from a file and executes it
         to set up the database structure on first run.
         """
-        
+        # Use the context manager to get a database connection
+        with self.get_connection() as conn:
+            # Create a cursor object to execute SQL commands
+            cursor = conn.cursor()
+            
+            # Open the schema file in read mode ('r')
+            # "knitting_schema.sql" contains all CREATE TABLE statements
+            with open("knitting_schema.sql", "r") as f:
+                # Read the entire contents of the schema file as a string
+                schema = f.read()
+            
+            # Execute the entire SQL schema as a script
+            # This runs all the CREATE TABLE, DROP TABLE, and CREATE INDEX statements
+            # The schema file includes DROP statements to clean up existing tables
+            # and CREATE statements to build the database structure fresh
+            cursor.executescript(schema)
+            
+            # Commit (save) the changes to the database permanently
+            # This makes the table creation permanent
+            conn.commit()
