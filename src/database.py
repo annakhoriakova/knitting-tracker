@@ -24,7 +24,9 @@ class Database:
     """Handles database connections and basic operations"""
     
     def __init__(self, db_path: str = "data/knitting.db"):
-        """Initialize the Database object with a path to the database file
+        """
+        Initialize the Database object with a path to the database file
+
         Args:
             db_path: Path to the SQLite database file (default: "data/knitting.db")
         """
@@ -35,7 +37,8 @@ class Database:
 
     @contextmanager
     def get_connection(self):
-        """Context manager for database connections
+        """
+        Context manager for database connections
         
         This allows using 'with Database().get_connection() as conn:' syntax
         which automatically handles opening and closing the connection.
@@ -55,7 +58,8 @@ class Database:
             conn.close()
                 
     def _initialize_database(self):
-        """Create tables if they don't exist
+        """
+        Create tables if they don't exist
         
         This method reads the SQL schema from a file and executes it
         to set up the database structure on first run.
