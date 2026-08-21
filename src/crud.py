@@ -259,6 +259,101 @@ def get_all_yarns(self) -> List[Yarn]:
 
 # ============ PROJECT OPERATIONS ============
 
-
+def create_project(self, project: Project) -> int:
+    """
+    Create a new project in the database.
+    
+    This creates the main project record. After creating a project,
+    add_yarn_to_project() can be used to associate yarns with it.
+    
+    Args:
+        project: A Project dataclass instance with project details.
+                 Requires project_name, pattern_id, and needle_id.
+                 Status defaults to 'Planning' if not specified.
+                 start_date and end_date should be in ISO format (YYYY-MM-DD).
+    
+    Returns:
+        int: The auto-generated project_id of the newly created project.
+    
+    Raises:
+        sqlite3.IntegrityError: If required fields are NULL or foreign key
+                                constraints are violated (invalid pattern_id/needle_id).
+    
+    Example:
+        project = Project(
+            project_name="Aran Sweater",
+            start_date="2026-08-21",
+            status="Planning",
+            recipient="Me",
+            pattern_id=1,
+            needle_id=3
+        )
+        project_id = tracker.create_project(project)
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO PROJECT (
+                project_name, start_date, end_date, status, 
+                recipient, pattern_id, needle_id
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            project.project_name, project.start_date, project.end_date, project.status,
+            project.recipient, project.pattern_id, project.needle_id
+        ))
+        project_id = cursor.lastrowid
+        conn.commit()
+        return project_id
+    
+def get_project(self, project_id: int) -> Optional[Project]:
+    """
+    Retrieve a complete project with all its associated yarns.
+    
+    This method performs a two-step query:
+    1. Gets the main project record
+    2. Gets all yarns linked to this project via PROJECT_YARN table
+       (including the number of skeins used for each yarn)
+    
+    The yarns are stored in the Project.yarns attribute as a list of
+    dictionaries, each containing yarn details plus skeins_used.
+    
+    Args:
+        project_id: The unique identifier of the project to retrieve.
+    
+    Returns:
+        Optional[Project]: A Project object with populated yarns list,
+                           or None if no project exists with the given ID.
+    
+    Example:
+        project = tracker.get_project(1)
+        if project:
+            print(f"Project: {project.project_name}")
+            for yarn_data in project.yarns:
+                print(f"  - {yarn_data['yarn_brand']} x {yarn_data['skeins_used']} skeins")
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        
+        # Get the main project information
+        cursor.execute("SELECT * FROM PROJECT WHERE project_id = ?", (project_id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+        
+        # Convert the row to a Project object
+        project = Project(**dict(row))
+        
+        # Get all yarns associated with this project (both yarn details and the number of skeins used)
+        cursor.execute("""
+            SELECT y.*, py.skeins_used 
+            FROM YARN y
+            JOIN PROJECT_YARN py ON y.yarn_id = py.yarn_id
+            WHERE py.project_id = ?
+        """, (project_id,))
+        # Store the yarn data (including skeins_used) in the project's yarns list
+        project.yarns = [dict(row) for row in cursor.fetchall()]
+        
+        return project
 
 # ============ SEARCH & FILTER ============
