@@ -1,10 +1,10 @@
 # Knitting Project Tracker
 
-A SQL database schema for tracking knitting projects, patterns, yarn inventory, and needle collections. Designed for knitters who want to organize their projects and analyze their crafting habits.
+A Python application with a relational database for tracking knitting projects, patterns, yarn inventory, and needle collections. Designed for knitters who want to organize their projects and analyze their crafting habits.
 
 ## Project Structure
 ```
-knitting-tracker-sql/
+knitting-tracker/
 ├── src/                     # Main source code directory
 │   ├── __init__.py
 │   ├── database.py          # Database connection & setup
@@ -41,8 +41,47 @@ The database consists of five tables:
 
 - **PATTERN**: Stores knitting pattern information
 - **NEEDLE**: Tracks needle tools with size, type, and material
-- **YARN**: Manages yarn inventory with brand, color, and yardage
+- **YARN**: Manages yarn inventory with brand, colour, and yardage
 - **PROJECT**: Main table for project tracking with foreign keys to PATTERN and NEEDLE
 - **PROJECT_YARN**: Bridge table linking projects to yarns (many-to-many relationship)
 
 The PROJECT_YARN table is a weak entity with a composite primary key consisting of project_id and yarn_id, ensuring each project-yarn combination is unique.
+
+## Installation
+
+### Prerequisites
+- Python 3.8 or higher (recommended for best compatibility)
+- pip (Python package manager)
+
+### Setup Instructions
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/annakhoriakova/knitting-tracker.git
+cd knitting-tracker
+```
+
+### 2. Create a virtual environment
+
+#### Windows:
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+#### macOS/Linux:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Initialize the database
+```bash
+# Ensure the schema file is in the root directory
+python -c "from src.database import Database; Database()"
+```
