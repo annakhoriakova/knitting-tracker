@@ -89,3 +89,14 @@ CREATE TABLE PROJECT_YARN (
     FOREIGN KEY (project_id) REFERENCES PROJECT(project_id) ON DELETE CASCADE,
     FOREIGN KEY (yarn_id) REFERENCES YARN(yarn_id) ON DELETE RESTRICT
 );
+
+-- ============================================================
+-- INDEXES (for performance)
+-- ============================================================
+
+-- For faster lookups on foreign keys
+CREATE INDEX idx_project_pattern_id ON PROJECT(pattern_id);
+CREATE INDEX idx_project_needle_id ON PROJECT(needle_id);
+CREATE INDEX idx_project_status ON PROJECT(status);          -- For filtering active projects
+CREATE INDEX idx_project_yarn_project ON PROJECT_YARN(project_id);
+CREATE INDEX idx_project_yarn_yarn ON PROJECT_YARN(yarn_id);
