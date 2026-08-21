@@ -1,9 +1,19 @@
-'''
-Name: Anna Khoriakova
+"""
+============================================================
+Database Layer for Knitting Project Tracker
+============================================================
+This module handles all database operations including:
+- SQLite connection management
+- Database initialization and schema setup
+- Connection context management for safe resource handling
+
+The database layer works with the models defined in models.py
+and the CRUD operations in crud.py.
+
+Author: Anna Khoriakova
 Date: 2026-08-21
-Description: Database layer for the Knitting Project Tracker application.
-             Manages SQLite connections and initializes the database schema.
-'''
+============================================================
+"""
 
 import sqlite3
 from contextlib import contextmanager
