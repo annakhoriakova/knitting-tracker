@@ -21,6 +21,10 @@ class TestDatabase:
     Test suite for the Database class.
     
     Tests cover:
+    - Database initialization and schema creation
+    - Connection management with context manager
+    - Multiple connections and resource cleanup
+    - Error handling and edge cases
     
     The class uses pytest fixtures for setup and teardown:
     - tmp_path: pytest-provided temporary directory
@@ -172,3 +176,95 @@ class TestDatabase:
             for table in expected_tables:
                 assert table in tables, f"Table {table} was not created"
 
+    def test_connection_context_manager(self, db):
+        """
+        Test that the connection context manager works properly.
+        
+        Verifies that:
+        - get_connection() returns a valid SQLite connection
+        - The connection can execute queries
+        - The context manager handles cleanup properly
+        """
+        # Use the context manager
+        with db.get_connection() as conn:
+            # Assert connection is a SQLite connection object
+            assert isinstance(conn, sqlite3.Connection)
+            
+            # Execute a simple query to verify connection works
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1")
+            result = cursor.fetchone()[0]
+            assert result == 1
+
+    def test_connection_closes_properly(self, db):
+        """
+        Test that connections are closed after context manager exits.
+        
+        Verifies that:
+        - Connection is open while inside the context manager
+        - Connection is automatically closed when exiting the context
+        - No resources are leaked
+        """
+        conn = None
+        with db.get_connection() as c:
+            conn = c
+            # Try a simple query to verify connection is active
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1")
+            result = cursor.fetchone()[0]
+            assert result == 1
+        
+        # Trying to execute should raise an error
+        # because the connection should be closed
+        with pytest.raises(sqlite3.ProgrammingError) as excinfo:
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1")
+        
+        # Verify the error is about closed connection
+        assert "cannot operate on a closed database" in str(excinfo.value).lower()
+
+    def test_multiple_connections(self, db):
+        """
+        Test that multiple connections can be used simultaneously.
+        
+        Verifies that:
+        - Different connections are unique objects
+        - Each connection can be used independently
+        - Connections close when their context ends
+        """
+        # Use two nested context managers
+        with db.get_connection() as conn1:
+            # Check conn1 is open by executing a query
+            cursor1 = conn1.cursor()
+            cursor1.execute("SELECT 1")
+            assert cursor1.fetchone()[0] == 1
+            
+            with db.get_connection() as conn2:
+                # Assert connections are different objects
+                assert conn1 is not conn2
+                
+                # Both connections should be open and usable
+                cursor1 = conn1.cursor()
+                cursor1.execute("SELECT 2")
+                assert cursor1.fetchone()[0] == 2
+                
+                cursor2 = conn2.cursor()
+                cursor2.execute("SELECT 3")
+                assert cursor2.fetchone()[0] == 3
+            
+            # Trying to use conn2 should raise an error
+            with pytest.raises(sqlite3.ProgrammingError) as excinfo:
+                cursor = conn2.cursor()
+                cursor.execute("SELECT 1")
+            assert "cannot operate on a closed database" in str(excinfo.value).lower()
+            
+            # conn1 should still be open
+            cursor1 = conn1.cursor()
+            cursor1.execute("SELECT 4")
+            assert cursor1.fetchone()[0] == 4
+        
+        # conn1 should also be closed
+        with pytest.raises(sqlite3.ProgrammingError) as excinfo:
+            cursor = conn1.cursor()
+            cursor.execute("SELECT 1")
+        assert "cannot operate on a closed database" in str(excinfo.value).lower()
