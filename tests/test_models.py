@@ -78,3 +78,60 @@ class TestPattern:
         assert pattern.pattern_id is None
         assert pattern.pattern_name == ""  # Empty string, not None
         assert pattern.designer is None
+
+class TestNeedle:
+    """
+    Test suite for the Needle model.
+    
+    Tests cover:
+    - Creating needles with all physical attributes
+    - Creating needles with only essential information
+    """
+    
+    def test_create_needle_with_all_fields(self):
+        """
+        Test creating a Needle with all fields provided.
+        
+        Verifies that:
+        - All needle attributes are correctly stored
+        - Size is stored as a float (supports decimal sizes like 3.75mm)
+        - Type, material, length, and brand are all saved
+        """
+        # Create a needle with complete specifications
+        needle = Needle(
+            needle_id=1,
+            needle_size_mm=4.0,
+            needle_type="Circular",
+            needle_material="Metal",
+            needle_length="24",
+            needle_brand="KnitPro"
+        )
+        
+        # Assert all fields were set correctly
+        assert needle.needle_id == 1
+        assert needle.needle_size_mm == 4.0
+        assert needle.needle_type == "Circular"
+        assert needle.needle_material == "Metal"
+        assert needle.needle_length == "24"
+        assert needle.needle_brand == "KnitPro"
+    
+    def test_create_needle_with_minimal_fields(self):
+        """
+        Test creating a Needle with only required fields.
+        
+        Verifies that:
+        - Needle can be created with just size and type
+        - All other attributes are optional and default to None
+        - Common for patterns that specify size but not brand/material
+        """
+        # Create a needle with just the essential information
+        needle = Needle(needle_size_mm=5.5, needle_type="DPN")
+        
+        # Assert required fields were set
+        assert needle.needle_size_mm == 5.5
+        assert needle.needle_type == "DPN"
+        
+        # Assert optional fields are None (not set)
+        assert needle.needle_material is None
+        assert needle.needle_length is None
+        assert needle.needle_brand is None
