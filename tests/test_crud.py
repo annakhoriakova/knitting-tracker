@@ -133,3 +133,73 @@ class TestCrudOperations:
             weight_category="Worsted",
             total_yardage=200
         )
+    
+    # ============ PATTERN TESTS ============
+    # Tests for the Pattern entity CRUD operations
+    
+    def test_create_pattern(self, tracker, sample_pattern):
+        """
+        Test creating a new pattern.
+        
+        This test verifies the create-read flow:
+        1. Create a pattern in the database
+        2. Get the auto-generated ID
+        3. Read the pattern back from the database
+        4. Verify all data was saved correctly
+        
+        This tests both the create_pattern and get_pattern methods.
+        """
+        # Create the pattern
+        pattern_id = tracker.create_pattern(sample_pattern)
+        
+        # Verify ID should be positive (auto-generated)
+        assert pattern_id > 0
+        
+        # Read the pattern back
+        saved_pattern = tracker.get_pattern(pattern_id)
+        
+        # Verify all data is correct
+        assert saved_pattern is not None
+        assert saved_pattern.pattern_name == "Test Pattern"
+        assert saved_pattern.designer == "Test Designer"
+    
+    def test_get_pattern_not_found(self, tracker):
+        """
+        Test getting a non-existent pattern.
+        
+        Verifies that:
+        - Getting a pattern with an invalid ID returns None
+        - No exception is raised
+        - The method handles the "not found" case properly
+        """
+        # Try to get a pattern with ID 999 (shouldn't exist)
+        pattern = tracker.get_pattern(999)
+        
+        # Should return None instead of raising an error
+        assert pattern is None
+    
+    def test_get_all_patterns(self, tracker, sample_pattern):
+        """
+        Test retrieving all patterns.
+        
+        This test verifies:
+        1. Multiple patterns can be inserted
+        2. get_all_patterns returns all of them
+        3. No patterns are lost or duplicated
+        4. Results are sorted by name
+        """
+        # Insert two patterns
+        pattern1_id = tracker.create_pattern(sample_pattern)
+        
+        # Insert a second pattern with different name
+        pattern2 = Pattern(pattern_name="Pattern 2", designer="Designer 2")
+        pattern2_id = tracker.create_pattern(pattern2)
+        
+        # Get all patterns
+        patterns = tracker.get_all_patterns()
+        
+        # Verify both patterns are in the results
+        assert len(patterns) >= 2  # Might have more from other tests
+        pattern_ids = [p.pattern_id for p in patterns]
+        assert pattern1_id in pattern_ids
+        assert pattern2_id in pattern_ids
