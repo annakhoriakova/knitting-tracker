@@ -299,3 +299,118 @@ class TestCrudOperations:
         yarn_ids = [y.yarn_id for y in yarns]
         assert yarn1_id in yarn_ids
         assert yarn2_id in yarn_ids
+    
+    # ============ PROJECT TESTS ============
+    
+    def test_create_project(self, tracker, sample_pattern, sample_needle, sample_yarn):
+        """
+        Test creating a new project with yarn.
+        
+        This is a test covering:
+        1. Creating all dependencies (pattern, needle, yarn)
+        2. Creating a project with references to these
+        3. Associating yarn with the project
+        4. Verifying the complete project with yarns is retrieved
+        
+        This tests the full relationship chain:
+        Project -> Pattern
+        Project -> Needle
+        Project -> Yarn (via PROJECT_YARN)
+        """
+        # Create dependencies
+        pattern_id = tracker.create_pattern(sample_pattern)
+        needle_id = tracker.create_needle(sample_needle)
+        yarn_id = tracker.create_yarn(sample_yarn)
+        
+        # Create the project
+        project = Project(
+            project_name="Test Project",
+            start_date="2026-08-21",
+            status="Planning",
+            recipient="Test Recipient",
+            pattern_id=pattern_id,
+            needle_id=needle_id
+        )
+        project_id = tracker.create_project(project)
+        
+        # Verify project was created
+        assert project_id > 0
+        
+        # Add yarn to project (with 3 skeins used)
+        tracker.add_yarn_to_project(project_id, yarn_id, 3)
+        
+        # Retrieve and verify the complete project
+        saved_project = tracker.get_project(project_id)
+        
+        # Verify project fields
+        assert saved_project is not None
+        assert saved_project.project_name == "Test Project"
+        assert saved_project.status == "Planning"
+        assert saved_project.recipient == "Test Recipient"
+        assert saved_project.pattern_id == pattern_id
+        assert saved_project.needle_id == needle_id
+        
+        # Verify associated yarn
+        assert len(saved_project.yarns) == 1
+        assert saved_project.yarns[0]['yarn_brand'] == "TestBrand"
+        assert saved_project.yarns[0]['skeins_used'] == 3
+    
+    def test_update_project_status(self, tracker, sample_pattern, sample_needle):
+        """
+        Test updating a project's status.
+        
+        Verifies that:
+        1. Status can be changed from default ('Planning') to a new value
+        2. The update returns success (True)
+        3. The new status is persisted in the database
+        4. Other fields remain unchanged
+        """
+        # Setup: Create dependencies and project
+        pattern_id = tracker.create_pattern(sample_pattern)
+        needle_id = tracker.create_needle(sample_needle)
+        
+        project = Project(
+            project_name="Test Project",
+            pattern_id=pattern_id,
+            needle_id=needle_id
+        )
+        project_id = tracker.create_project(project)
+        
+        # Update status from 'Planning' (default) to 'WIP'
+        result = tracker.update_project_status(project_id, "WIP")
+        
+        # Verify update was successful
+        assert result is True
+        
+        # Verify status was changed in database
+        saved_project = tracker.get_project(project_id)
+        assert saved_project.status == "WIP"
+    
+    def test_update_project_status_invalid(self, tracker, sample_pattern, sample_needle):
+        """
+        Test updating a project with an invalid status.
+        
+        Verifies that:
+        1. Invalid status values raise a ValueError
+        2. The error message mentions the allowed values
+        3. The project status remains unchanged (rollback)
+        
+        This tests the validation in update_project_status.
+        """
+        # Setup: Create dependencies and project
+        pattern_id = tracker.create_pattern(sample_pattern)
+        needle_id = tracker.create_needle(sample_needle)
+        
+        project = Project(
+            project_name="Test Project",
+            pattern_id=pattern_id,
+            needle_id=needle_id
+        )
+        project_id = tracker.create_project(project)
+        
+        # Try to update with invalid status
+        with pytest.raises(ValueError) as excinfo:
+            tracker.update_project_status(project_id, "InvalidStatus")
+        
+        # Verify error message is helpful
+        assert "Invalid status" in str(excinfo.value)
