@@ -135,3 +135,64 @@ class TestNeedle:
         assert needle.needle_material is None
         assert needle.needle_length is None
         assert needle.needle_brand is None
+
+class TestYarn:
+    """
+    Test suite for the Yarn model.
+    
+    Tests cover:
+    - Creating yarn with complete specifications
+    - Creating yarn with just brand name
+    """
+    
+    def test_create_yarn_with_all_fields(self):
+        """
+        Test creating a Yarn with all fields provided.
+        
+        Verifies that:
+        - All yarn attributes are correctly stored
+        - Dye lot is preserved (important for colour matching)
+        - Yardage is stored as integer for calculations
+        - Weight category is stored for gauge matching
+        """
+        # Create a yarn with complete details
+        yarn = Yarn(
+            yarn_id=1,
+            yarn_brand="Malabrigo",
+            yarn_line="Rios",
+            colour_name="Whale's Road",
+            dye_lot="12345",
+            weight_category="Worsted",
+            total_yardage=210
+        )
+        
+        # Assert all fields were set correctly
+        assert yarn.yarn_id == 1
+        assert yarn.yarn_brand == "Malabrigo"
+        assert yarn.yarn_line == "Rios"
+        assert yarn.colour_name == "Whale's Road"
+        assert yarn.dye_lot == "12345"
+        assert yarn.weight_category == "Worsted"
+        assert yarn.total_yardage == 210
+    
+    def test_create_yarn_with_minimal_fields(self):
+        """
+        Test creating a Yarn with only the required brand.
+        
+        Verifies that:
+        - Brand is the only required field
+        - All other details can be added later
+        - This is useful when you know the brand but not the specific line yet
+        """
+        # Create a yarn with just the brand name
+        yarn = Yarn(yarn_brand="Cascade")
+        
+        # Assert brand was set
+        assert yarn.yarn_brand == "Cascade"
+        
+        # Assert all other fields are None (not set yet)
+        assert yarn.yarn_line is None
+        assert yarn.colour_name is None
+        assert yarn.dye_lot is None
+        assert yarn.weight_category is None
+        assert yarn.total_yardage is None
