@@ -196,3 +196,126 @@ class TestYarn:
         assert yarn.dye_lot is None
         assert yarn.weight_category is None
         assert yarn.total_yardage is None
+
+class TestProject:
+    """
+    Test suite for the Project model.
+    
+    Tests cover:
+    - Creating complete projects with all fields
+    - Creating projects with minimal information
+    - Default status behavior
+    - Post-initialization handling of yarns list
+    """
+    
+    def test_create_project_with_all_fields(self):
+        """
+        Test creating a Project with all fields provided.
+        
+        Verifies that:
+        - All project fields are correctly assigned
+        - Associated yarns are stored as a list
+        - Dates are stored as strings (ISO format)
+        - Foreign key references (pattern_id, needle_id) are preserved
+        """
+        # Create a yarn to associate with the project
+        project_yarn = Yarn(yarn_brand="Malabrigo")
+        
+        # Create a project with complete information
+        project = Project(
+            project_id=1,
+            project_name="My Aran Sweater",
+            start_date="2026-08-21",
+            end_date=None,  # Project is still in progress
+            status="WIP",
+            recipient="Me",
+            pattern_id=1,
+            needle_id=2,
+            yarns=[project_yarn]  # Associate yarn with project
+        )
+        
+        # Assert all fields were set correctly
+        assert project.project_id == 1
+        assert project.project_name == "My Aran Sweater"
+        assert project.start_date == "2026-08-21"
+        assert project.end_date is None  # In progress project
+        assert project.status == "WIP"
+        assert project.recipient == "Me"
+        assert project.pattern_id == 1
+        assert project.needle_id == 2
+        assert len(project.yarns) == 1
+        assert project.yarns[0].yarn_brand == "Malabrigo"
+    
+    def test_create_project_with_minimal_fields(self):
+        """
+        Test creating a Project with only required fields.
+        
+        Verifies that:
+        - Only name, pattern_id, and needle_id are required
+        - Status defaults to 'Planning' automatically
+        - All date fields are None for new projects
+        - yarns is initialized as empty list by __post_init__
+        """
+        # Create a project with just the essentials
+        project = Project(
+            project_name="Simple Hat",
+            pattern_id=1,
+            needle_id=2
+        )
+        
+        # Assert required fields were set
+        assert project.project_name == "Simple Hat"
+        assert project.pattern_id == 1
+        assert project.needle_id == 2
+        
+        # Assert defaults are applied correctly
+        assert project.status == "Planning"  # Default status
+        assert project.start_date is None    # No start date set
+        assert project.end_date is None      # No end date set
+        assert project.recipient is None     # No recipient specified
+        assert project.yarns == []           # __post_init__ ensures empty list
+    
+    def test_project_default_status(self):
+        """
+        Test that Project status defaults to 'Planning'.
+        """
+        # Create project without specifying status
+        project = Project(project_name="Test", pattern_id=1, needle_id=1)
+        
+        # Assert default status is 'Planning'
+        assert project.status == "Planning"
+    
+    def test_project_yarns_post_init(self):
+        """
+        Test that __post_init__ ensures yarns is always a list.
+        
+        Three scenarios are tested:
+        1. yarns=None (explicitly passed as None)
+        2. yarns not provided at all (uses default)
+        3. yarns already a list (should remain unchanged)
+        """
+        # Scenario 1: yarns explicitly set to None
+        project1 = Project(
+            project_name="Test1",
+            pattern_id=1,
+            needle_id=1,
+            yarns=None  # Explicitly None
+        )
+        # __post_init__ should convert this to empty list
+        assert project1.yarns == []
+        
+        # Scenario 2: yarns not provided (uses default None from signature)
+        project2 = Project(project_name="Test2", pattern_id=1, needle_id=1)
+        # __post_init__ should initialize as empty list
+        assert project2.yarns == []
+        
+        # Scenario 3: yarns already a list (should stay as-is)
+        yarns = [Yarn(yarn_brand="Test")]
+        project3 = Project(
+            project_name="Test3",
+            pattern_id=1,
+            needle_id=1,
+            yarns=yarns  # Already a list
+        )
+        # __post_init__ should not modify an existing list
+        assert project3.yarns == yarns
