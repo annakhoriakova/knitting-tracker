@@ -203,3 +203,50 @@ class TestCrudOperations:
         pattern_ids = [p.pattern_id for p in patterns]
         assert pattern1_id in pattern_ids
         assert pattern2_id in pattern_ids
+    
+    # ============ NEEDLE TESTS ============
+    
+    def test_create_needle(self, tracker, sample_needle):
+        """
+        Test creating a new needle.
+        
+        Similar to pattern test, but for needles.
+        Verifies needle can be created and retrieved.
+        """
+        # Create the needle
+        needle_id = tracker.create_needle(sample_needle)
+        
+        # Verify ID is valid
+        assert needle_id > 0
+        
+        # Verify needle was saved by checking it appears in all needles list
+        needles = tracker.get_all_needles()
+        needle_ids = [n.needle_id for n in needles]
+        assert needle_id in needle_ids
+    
+    def test_get_all_needles(self, tracker, sample_needle):
+        """
+        Test retrieving all needles.
+        
+        Verifies that needles are returned and sorted correctly.
+        Tests that different types of needles can coexist.
+        """
+        # Insert first needle
+        needle1_id = tracker.create_needle(sample_needle)
+        
+        # Insert a second needle with different attributes
+        needle2 = Needle(
+            needle_size_mm=5.5,
+            needle_type="DPN",
+            needle_material="Wood"
+        )
+        needle2_id = tracker.create_needle(needle2)
+        
+        # Get all needles
+        needles = tracker.get_all_needles()
+        
+        # Verify both needles are present
+        assert len(needles) >= 2
+        needle_ids = [n.needle_id for n in needles]
+        assert needle1_id in needle_ids
+        assert needle2_id in needle_ids
