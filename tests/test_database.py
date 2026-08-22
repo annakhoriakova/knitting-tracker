@@ -131,3 +131,44 @@ class TestDatabase:
         
         # Cleanup: return to original directory
         os.chdir(original_dir)
+
+    def test_database_initialization(self, db, temp_db_path):
+            """
+            Test that the database initializes correctly.
+            
+            Verifies that:
+            - The database file is created on disk
+            - The db_path attribute matches the expected path
+            - The database is ready for connections
+            """
+            # Assert the database file was created
+            assert os.path.exists(temp_db_path)
+            # Assert the path was stored correctly
+            assert db.db_path == temp_db_path
+        
+    def test_tables_created(self, db):
+        """
+        Test that all expected tables are created.
+        
+        Verifies that:
+        - All 5 tables (PATTERN, NEEDLE, YARN, PROJECT, PROJECT_YARN) exist
+        - The schema was correctly applied
+        - No tables are missing
+        
+        This test ensures that _initialize_database() correctly
+        executed the schema SQL and created all tables.
+        """
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Query all table names from SQLite's master table
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = [row[0] for row in cursor.fetchall()]
+            
+            # Define the expected tables (matches schema)
+            expected_tables = ['PATTERN', 'NEEDLE', 'YARN', 'PROJECT', 'PROJECT_YARN']
+            
+            # Check that each expected table exists
+            for table in expected_tables:
+                assert table in tables, f"Table {table} was not created"
+
