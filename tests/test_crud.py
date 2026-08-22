@@ -250,3 +250,52 @@ class TestCrudOperations:
         needle_ids = [n.needle_id for n in needles]
         assert needle1_id in needle_ids
         assert needle2_id in needle_ids
+    
+    # ============ YARN TESTS ============
+    
+    def test_create_yarn(self, tracker, sample_yarn):
+        """
+        Test creating a new yarn.
+        
+        Verifies yarn can be created with all attributes
+        and retrieved from the database.
+        """
+        # Create the yarn
+        yarn_id = tracker.create_yarn(sample_yarn)
+        
+        # Verify ID is valid
+        assert yarn_id > 0
+        
+        # Verify yarn was saved
+        yarns = tracker.get_all_yarns()
+        yarn_ids = [y.yarn_id for y in yarns]
+        assert yarn_id in yarn_ids
+    
+    def test_get_all_yarns(self, tracker, sample_yarn):
+        """
+        Test retrieving all yarns.
+        
+        Verifies multiple yarns can be stored and retrieved.
+        Tests that yarns from different brands are handled correctly.
+        """
+        # Insert first yarn
+        yarn1_id = tracker.create_yarn(sample_yarn)
+        
+        # Insert a second yarn with different brand
+        yarn2 = Yarn(
+            yarn_brand="Brand2",
+            yarn_line="Line2",
+            colour_name="Color2",
+            weight_category="DK",
+            total_yardage=150
+        )
+        yarn2_id = tracker.create_yarn(yarn2)
+        
+        # Get all yarns
+        yarns = tracker.get_all_yarns()
+        
+        # Verify both yarns are present
+        assert len(yarns) >= 2
+        yarn_ids = [y.yarn_id for y in yarns]
+        assert yarn1_id in yarn_ids
+        assert yarn2_id in yarn_ids
