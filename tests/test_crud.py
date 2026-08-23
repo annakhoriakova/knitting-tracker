@@ -578,3 +578,97 @@ class TestCrudOperations:
         skeins_used = {y['yarn_brand']: y['skeins_used'] for y in saved_project.yarns}
         assert skeins_used["TestBrand"] == 1  # Default
         assert skeins_used["Brand2"] == 2     # Custom
+    
+    def test_duplicate_yarn_to_project(self, tracker, sample_pattern, sample_needle, sample_yarn):
+        """
+        Test that adding the same yarn to a project twice raises an error.
+        
+        Since project_id and yarn_id form a composite primary key,
+        duplicates should be prevented by the database constraint.
+        """
+        # Setup: Create dependencies
+        pattern_id = tracker.create_pattern(sample_pattern)
+        needle_id = tracker.create_needle(sample_needle)
+        yarn_id = tracker.create_yarn(sample_yarn)
+        
+        project = Project(
+            project_name="Test Project",
+            pattern_id=pattern_id,
+            needle_id=needle_id
+        )
+        project_id = tracker.create_project(project)
+        
+        # Add yarn first time (should succeed)
+        tracker.add_yarn_to_project(project_id, yarn_id, 2)
+        
+        # Add same yarn again (should fail due to primary key constraint)
+        with pytest.raises(Exception) as excinfo:  # SQLite will raise IntegrityError
+            tracker.add_yarn_to_project(project_id, yarn_id, 3)
+        
+        # Verify error is related to duplicate key
+        assert "UNIQUE constraint failed" in str(excinfo.value) or "IntegrityError" in str(excinfo.value)
+
+    def test_project_without_yarn(self, tracker, sample_pattern, sample_needle):
+        """
+        Test creating a project without associating any yarn.
+        
+        Verifies that projects can exist without yarns (e.g., in planning stage).
+        """
+        # Setup: Create dependencies
+        pattern_id = tracker.create_pattern(sample_pattern)
+        needle_id = tracker.create_needle(sample_needle)
+        
+        # Create project with no yarn
+        project = Project(
+            project_name="Project Without Yarn",
+            pattern_id=pattern_id,
+            needle_id=needle_id,
+            status="Planning"
+        )
+        project_id = tracker.create_project(project)
+        
+        # Retrieve and verify
+        saved_project = tracker.get_project(project_id)
+        assert saved_project is not None
+        assert saved_project.project_name == "Project Without Yarn"
+        assert saved_project.yarns == []  # No yarns associated
+    
+    def test_multiple_yarns_same_project(self, tracker, sample_pattern, sample_needle):
+        """
+        Test adding multiple yarns to the same project.
+        
+        This is common for striped projects, colorwork, or when
+        using multiple colours in a single project.
+        """
+        # Setup: Create dependencies
+        pattern_id = tracker.create_pattern(sample_pattern)
+        needle_id = tracker.create_needle(sample_needle)
+        
+        project = Project(
+            project_name="Striped Scarf",
+            pattern_id=pattern_id,
+            needle_id=needle_id
+        )
+        project_id = tracker.create_project(project)
+        
+        # Create and add multiple yarns
+        yarns = []
+        for i in range(3):
+            yarn = Yarn(
+                yarn_brand=f"Brand{i}",
+                yarn_line=f"Line{i}",
+                colour_name=f"Colour{i}",
+                weight_category="Worsted",
+                total_yardage=200
+            )
+            yarn_id = tracker.create_yarn(yarn)
+            yarns.append(yarn_id)
+            tracker.add_yarn_to_project(project_id, yarn_id, i + 1)
+        
+        # Verify all yarns are associated
+        saved_project = tracker.get_project(project_id)
+        assert len(saved_project.yarns) == 3
+        
+        # Verify skeins used for each
+        skeins = [y['skeins_used'] for y in saved_project.yarns]
+        assert sorted(skeins) == [1, 2, 3]  # Each had different skeins count
