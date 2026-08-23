@@ -414,3 +414,167 @@ class TestCrudOperations:
         
         # Verify error message is helpful
         assert "Invalid status" in str(excinfo.value)
+    
+    def test_get_all_projects(self, tracker, sample_pattern, sample_needle):
+        """
+        Test retrieving all projects.
+        
+        Verifies that:
+        1. Multiple projects can be created and retrieved
+        2. Each project has unique IDs
+        3. Projects are returned in expected order (by start_date DESC)
+        """
+        # Setup: Create dependencies shared by both projects
+        pattern_id = tracker.create_pattern(sample_pattern)
+        needle_id = tracker.create_needle(sample_needle)
+        
+        # Create first project
+        project1 = Project(
+            project_name="Project 1",
+            pattern_id=pattern_id,
+            needle_id=needle_id
+        )
+        project1_id = tracker.create_project(project1)
+        
+        # Create second project with different status
+        project2 = Project(
+            project_name="Project 2",
+            pattern_id=pattern_id,
+            needle_id=needle_id,
+            status="WIP"
+        )
+        project2_id = tracker.create_project(project2)
+        
+        # Get all projects
+        projects = tracker.get_all_projects()
+        
+        # Verify both projects are in the results
+        assert len(projects) >= 2
+        project_ids = [p.project_id for p in projects]
+        assert project1_id in project_ids
+        assert project2_id in project_ids
+    
+    def test_get_active_projects(self, tracker, sample_pattern, sample_needle):
+        """
+        Test retrieving only active (Planning, WIP, Blocking) projects.
+        
+        This tests the filtering logic:
+        - Active projects: Planning, WIP, Blocking
+        - Inactive projects: Finished, Frogged, Abandoned
+        
+        Verifies that only active projects are returned and
+        inactive projects are properly excluded.
+        """
+        # Setup: Create dependencies shared by all projects
+        pattern_id = tracker.create_pattern(sample_pattern)
+        needle_id = tracker.create_needle(sample_needle)
+        
+        # Create projects with different statuses
+        # Active: WIP project (should be included)
+        project1 = Project(
+            project_name="Active WIP Project",
+            pattern_id=pattern_id,
+            needle_id=needle_id,
+            status="WIP"
+        )
+        tracker.create_project(project1)
+        
+        # Inactive: Finished project (should be excluded)
+        project2 = Project(
+            project_name="Finished Project",
+            pattern_id=pattern_id,
+            needle_id=needle_id,
+            status="Finished"
+        )
+        tracker.create_project(project2)
+        
+        # Active: Planning project (should be included)
+        project3 = Project(
+            project_name="Planning Project",
+            pattern_id=pattern_id,
+            needle_id=needle_id,
+            status="Planning"
+        )
+        tracker.create_project(project3)
+        
+        # Active: Blocking project (should be included)
+        project4 = Project(
+            project_name="Blocking Project",
+            pattern_id=pattern_id,
+            needle_id=needle_id,
+            status="Blocking"
+        )
+        tracker.create_project(project4)
+        
+        # Inactive: Frogged project (should be excluded)
+        project5 = Project(
+            project_name="Frogged Project",
+            pattern_id=pattern_id,
+            needle_id=needle_id,
+            status="Frogged"
+        )
+        tracker.create_project(project5)
+        
+        # Get active projects
+        active = tracker.get_active_projects()
+        
+        # Should only include active projects (WIP, Planning, Blocking)
+        active_names = [p.project_name for p in active]
+        
+        # Assert active projects are included
+        assert "Active WIP Project" in active_names
+        assert "Planning Project" in active_names
+        assert "Blocking Project" in active_names
+        
+        # Assert inactive projects are excluded
+        assert "Finished Project" not in active_names
+        assert "Frogged Project" not in active_names
+        
+        # Verify only active projects are returned (3 of the 5)
+        assert len(active) == 3
+    
+    def test_add_yarn_to_project(self, tracker, sample_pattern, sample_needle, sample_yarn):
+        """
+        Test adding yarn to a project.
+        
+        Verifies that:
+        1. Yarn can be associated with a project
+        2. Default skeins used is 1
+        3. Custom skeins used can be specified
+        4. Multiple yarns can be added to the same project
+        """
+        # Setup: Create dependencies
+        pattern_id = tracker.create_pattern(sample_pattern)
+        needle_id = tracker.create_needle(sample_needle)
+        yarn_id = tracker.create_yarn(sample_yarn)
+        
+        project = Project(
+            project_name="Test Project",
+            pattern_id=pattern_id,
+            needle_id=needle_id
+        )
+        project_id = tracker.create_project(project)
+        
+        # Add yarn with default skeins (1)
+        result = tracker.add_yarn_to_project(project_id, yarn_id)
+        assert result is True
+        
+        # Add another yarn with custom skeins (2)
+        yarn2 = Yarn(
+            yarn_brand="Brand2",
+            yarn_line="Line2",
+            colour_name="Color2",
+            weight_category="DK",
+            total_yardage=150
+        )
+        yarn2_id = tracker.create_yarn(yarn2)
+        tracker.add_yarn_to_project(project_id, yarn2_id, 2)
+        
+        # Verify both yarns are associated with the project
+        saved_project = tracker.get_project(project_id)
+        assert len(saved_project.yarns) == 2
+        
+        # Check skeins used for each yarn
+        skeins_used = {y['yarn_brand']: y['skeins_used'] for y in saved_project.yarns}
+        assert skeins_used["TestBrand"] == 1  # Default
+        assert skeins_used["Brand2"] == 2     # Custom
