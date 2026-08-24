@@ -363,6 +363,69 @@ class KnittingTracker:
             rows = cursor.fetchall()
             return [Yarn(**dict(row)) for row in rows]
 
+    def update_yarn(self, yarn_id: int, yarn: Yarn) -> bool:
+        """
+        Update an existing yarn in the database.
+        
+        Args:
+            yarn_id: The ID of the yarn to update.
+            yarn: Yarn object with updated values.
+        
+        Returns:
+            bool: True if the yarn was found and updated.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE YARN 
+                SET yarn_brand = ?, yarn_line = ?, colour_name = ?,
+                    dye_lot = ?, weight_category = ?, total_yardage = ?
+                WHERE yarn_id = ?
+            """, (yarn.yarn_brand, yarn.yarn_line, yarn.colour_name,
+                    yarn.dye_lot, yarn.weight_category, yarn.total_yardage, yarn_id))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def delete_yarn(self, yarn_id: int) -> bool:
+        """
+        Delete a yarn from the database.
+        
+        Will fail if the yarn is referenced by any project
+        (ON DELETE RESTRICT constraint).
+        
+        Args:
+            yarn_id: The ID of the yarn to delete.
+        
+        Returns:
+            bool: True if the yarn was deleted.
+        
+        Raises:
+            sqlite3.IntegrityError: If yarn is referenced by a project.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM YARN WHERE yarn_id = ?", (yarn_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def get_yarn(self, yarn_id: int) -> Optional[Yarn]:
+        """
+        Retrieve a yarn from the database by its ID.
+        
+        Args:
+            yarn_id: The unique identifier of the yarn to retrieve.
+        
+        Returns:
+            Optional[Yarn]: A Yarn object if found, None otherwise.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM YARN WHERE yarn_id = ?", (yarn_id,))
+            row = cursor.fetchone()
+            if row:
+                return Yarn(**dict(row))
+            return None
+
     # ============ PROJECT OPERATIONS ============
 
     def create_project(self, project: Project) -> int:
