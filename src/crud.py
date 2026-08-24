@@ -136,49 +136,6 @@ class KnittingTracker:
             rows = cursor.fetchall()
             return [Pattern(**dict(row)) for row in rows]
 
-    def update_pattern(self, pattern_id: int, pattern: Pattern) -> bool:
-        """
-        Update an existing pattern in the database.
-        
-        Args:
-            pattern_id: The ID of the pattern to update.
-            pattern: Pattern object with updated values.
-        
-        Returns:
-            bool: True if the pattern was found and updated.
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                UPDATE PATTERN 
-                SET pattern_name = ?, designer = ?
-                WHERE pattern_id = ?
-            """, (pattern.pattern_name, pattern.designer, pattern_id))
-            conn.commit()
-            return cursor.rowcount > 0
-
-    def delete_pattern(self, pattern_id: int) -> bool:
-        """
-        Delete a pattern from the database.
-        
-        Will fail if the pattern is referenced by any project
-        (ON DELETE RESTRICT constraint).
-        
-        Args:
-            pattern_id: The ID of the pattern to delete.
-        
-        Returns:
-            bool: True if the pattern was deleted.
-        
-        Raises:
-            sqlite3.IntegrityError: If pattern is referenced by a project.
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM PATTERN WHERE pattern_id = ?", (pattern_id,))
-            conn.commit()
-            return cursor.rowcount > 0
-
     # ============ NEEDLE OPERATIONS ============
 
     def create_needle(self, needle: Needle) -> int:
@@ -240,69 +197,6 @@ class KnittingTracker:
             rows = cursor.fetchall()
             return [Needle(**dict(row)) for row in rows]
 
-    def update_needle(self, needle_id: int, needle: Needle) -> bool:
-        """
-        Update an existing needle in the database.
-        
-        Args:
-            needle_id: The ID of the needle to update.
-            needle: Needle object with updated values.
-        
-        Returns:
-            bool: True if the needle was found and updated.
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                UPDATE NEEDLE 
-                SET needle_size_mm = ?, needle_type = ?, needle_material = ?,
-                    needle_length = ?, needle_brand = ?
-                WHERE needle_id = ?
-            """, (needle.needle_size_mm, needle.needle_type, needle.needle_material,
-                    needle.needle_length, needle.needle_brand, needle_id))
-            conn.commit()
-            return cursor.rowcount > 0
-
-    def delete_needle(self, needle_id: int) -> bool:
-        """
-        Delete a needle from the database.
-        
-        Will fail if the needle is referenced by any project
-        (ON DELETE RESTRICT constraint).
-        
-        Args:
-            needle_id: The ID of the needle to delete.
-        
-        Returns:
-            bool: True if the needle was deleted.
-        
-        Raises:
-            sqlite3.IntegrityError: If needle is referenced by a project.
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM NEEDLE WHERE needle_id = ?", (needle_id,))
-            conn.commit()
-            return cursor.rowcount > 0
-
-    def get_needle(self, needle_id: int) -> Optional[Needle]:
-        """
-        Retrieve a needle from the database by its ID.
-        
-        Args:
-            needle_id: The unique identifier of the needle to retrieve.
-        
-        Returns:
-            Optional[Needle]: A Needle object if found, None otherwise.
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM NEEDLE WHERE needle_id = ?", (needle_id,))
-            row = cursor.fetchone()
-            if row:
-                return Needle(**dict(row))
-            return None
-
     # ============ YARN OPERATIONS ============
 
     def create_yarn(self, yarn: Yarn) -> int:
@@ -362,69 +256,6 @@ class KnittingTracker:
             cursor.execute("SELECT * FROM YARN ORDER BY yarn_brand, yarn_line")
             rows = cursor.fetchall()
             return [Yarn(**dict(row)) for row in rows]
-
-    def update_yarn(self, yarn_id: int, yarn: Yarn) -> bool:
-        """
-        Update an existing yarn in the database.
-        
-        Args:
-            yarn_id: The ID of the yarn to update.
-            yarn: Yarn object with updated values.
-        
-        Returns:
-            bool: True if the yarn was found and updated.
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                UPDATE YARN 
-                SET yarn_brand = ?, yarn_line = ?, colour_name = ?,
-                    dye_lot = ?, weight_category = ?, total_yardage = ?
-                WHERE yarn_id = ?
-            """, (yarn.yarn_brand, yarn.yarn_line, yarn.colour_name,
-                    yarn.dye_lot, yarn.weight_category, yarn.total_yardage, yarn_id))
-            conn.commit()
-            return cursor.rowcount > 0
-
-    def delete_yarn(self, yarn_id: int) -> bool:
-        """
-        Delete a yarn from the database.
-        
-        Will fail if the yarn is referenced by any project
-        (ON DELETE RESTRICT constraint).
-        
-        Args:
-            yarn_id: The ID of the yarn to delete.
-        
-        Returns:
-            bool: True if the yarn was deleted.
-        
-        Raises:
-            sqlite3.IntegrityError: If yarn is referenced by a project.
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM YARN WHERE yarn_id = ?", (yarn_id,))
-            conn.commit()
-            return cursor.rowcount > 0
-
-    def get_yarn(self, yarn_id: int) -> Optional[Yarn]:
-        """
-        Retrieve a yarn from the database by its ID.
-        
-        Args:
-            yarn_id: The unique identifier of the yarn to retrieve.
-        
-        Returns:
-            Optional[Yarn]: A Yarn object if found, None otherwise.
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM YARN WHERE yarn_id = ?", (yarn_id,))
-            row = cursor.fetchone()
-            if row:
-                return Yarn(**dict(row))
-            return None
 
     # ============ PROJECT OPERATIONS ============
 
