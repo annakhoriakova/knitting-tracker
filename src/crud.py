@@ -240,6 +240,69 @@ def get_all_needles(self) -> List[Needle]:
         rows = cursor.fetchall()
         return [Needle(**dict(row)) for row in rows]
 
+def update_needle(self, needle_id: int, needle: Needle) -> bool:
+    """
+    Update an existing needle in the database.
+    
+    Args:
+        needle_id: The ID of the needle to update.
+        needle: Needle object with updated values.
+    
+    Returns:
+        bool: True if the needle was found and updated.
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE NEEDLE 
+            SET needle_size_mm = ?, needle_type = ?, needle_material = ?,
+                needle_length = ?, needle_brand = ?
+            WHERE needle_id = ?
+        """, (needle.needle_size_mm, needle.needle_type, needle.needle_material,
+                needle.needle_length, needle.needle_brand, needle_id))
+        conn.commit()
+        return cursor.rowcount > 0
+
+def delete_needle(self, needle_id: int) -> bool:
+    """
+    Delete a needle from the database.
+    
+    Will fail if the needle is referenced by any project
+    (ON DELETE RESTRICT constraint).
+    
+    Args:
+        needle_id: The ID of the needle to delete.
+    
+    Returns:
+        bool: True if the needle was deleted.
+    
+    Raises:
+        sqlite3.IntegrityError: If needle is referenced by a project.
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM NEEDLE WHERE needle_id = ?", (needle_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+
+def get_needle(self, needle_id: int) -> Optional[Needle]:
+    """
+    Retrieve a needle from the database by its ID.
+    
+    Args:
+        needle_id: The unique identifier of the needle to retrieve.
+    
+    Returns:
+        Optional[Needle]: A Needle object if found, None otherwise.
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM NEEDLE WHERE needle_id = ?", (needle_id,))
+        row = cursor.fetchone()
+        if row:
+            return Needle(**dict(row))
+        return None
+
 # ============ YARN OPERATIONS ============
 
 def create_yarn(self, yarn: Yarn) -> int:
