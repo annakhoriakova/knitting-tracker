@@ -123,7 +123,7 @@ def get_all_patterns(self) -> List[Pattern]:
     
     Returns:
         List[Pattern]: A list of all Pattern objects in the database.
-                       Returns an empty list if no patterns exist.
+                    Returns an empty list if no patterns exist.
     
     Example:
         all_patterns = tracker.get_all_patterns()
@@ -135,6 +135,49 @@ def get_all_patterns(self) -> List[Pattern]:
         cursor.execute("SELECT * FROM PATTERN ORDER BY pattern_name")
         rows = cursor.fetchall()
         return [Pattern(**dict(row)) for row in rows]
+
+def update_pattern(self, pattern_id: int, pattern: Pattern) -> bool:
+    """
+    Update an existing pattern in the database.
+    
+    Args:
+        pattern_id: The ID of the pattern to update.
+        pattern: Pattern object with updated values.
+    
+    Returns:
+        bool: True if the pattern was found and updated.
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE PATTERN 
+            SET pattern_name = ?, designer = ?
+            WHERE pattern_id = ?
+        """, (pattern.pattern_name, pattern.designer, pattern_id))
+        conn.commit()
+        return cursor.rowcount > 0
+
+def delete_pattern(self, pattern_id: int) -> bool:
+    """
+    Delete a pattern from the database.
+    
+    Will fail if the pattern is referenced by any project
+    (ON DELETE RESTRICT constraint).
+    
+    Args:
+        pattern_id: The ID of the pattern to delete.
+    
+    Returns:
+        bool: True if the pattern was deleted.
+    
+    Raises:
+        sqlite3.IntegrityError: If pattern is referenced by a project.
+    """
+    with self.db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM PATTERN WHERE pattern_id = ?", (pattern_id,))
+        conn.commit()
+        return cursor.rowcount > 0
 
 # ============ NEEDLE OPERATIONS ============
 
