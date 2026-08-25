@@ -88,3 +88,90 @@ STATUS_DISPLAY = {
 
 # Status ordering for dropdowns
 STATUS_ORDER = ['Planning', 'WIP', 'Blocking', 'Finished', 'Frogged', 'Abandoned']
+
+# ============================================================
+# WEIGHT CATEGORIES
+# ============================================================
+
+YARN_WEIGHTS = [
+    'Lace',
+    'Fingering',
+    'Sport',
+    'DK',
+    'Worsted',
+    'Aran',
+    'Bulky',
+    'Super Bulky',
+    'Jumbo'
+]
+
+# ============================================================
+# NEEDLE TYPES
+# ============================================================
+
+NEEDLE_TYPES = [
+    'Circular',
+    'Straight',
+    'DPN',              # Double Pointed Needles
+    'Interchangeable'
+]
+
+NEEDLE_MATERIALS = [
+    'Wood',
+    'Metal',
+    'Bamboo',
+    'Plastic',
+    'Carbon Fiber'
+]
+
+# ============================================================
+# HELPER FUNCTIONS
+# ============================================================
+
+def get_status_colour(status: str) -> str:
+    """
+    Get the colour for a given project status.
+    
+    Args:
+        status: The project status string
+    
+    Returns:
+        str: The hex colour code, or grey if status not found
+    """
+    return STATUS_COLOURS.get(status, '#757575')
+
+def get_status_display(status: str) -> str:
+    """
+    Get the display name for a given project status.
+    
+    Args:
+        status: The project status string
+    
+    Returns:
+        str: The user-friendly display name, or the original if not found
+    """
+    return STATUS_DISPLAY.get(status, status)
+
+# ============================================================
+# NEEDLE LENGTHS
+# ============================================================
+
+NEEDLE_LENGTHS = [
+    '8', '10', '12', '14', '16', '20', '24', '32', '40', '48', '60'
+]
+
+# ============================================================
+# YARN WEIGHT CATEGORIES
+# ============================================================
+
+YARN_WEIGHTS = [
+    'Lace',
+    'Fingering',
+    'Sport',
+    'DK',
+    'Worsted',
+    'Aran',
+    'Bulky',
+    'Super Bulky',
+    'Jumbo'
+]
