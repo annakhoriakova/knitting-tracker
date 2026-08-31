@@ -50,3 +50,92 @@ class BaseDialog(ctk.CTkToplevel):
         """Cancel and close the dialog."""
         self.result = False
         self.destroy()
+
+
+# ============================================================
+# PATTERN DIALOG
+# ============================================================
+
+class PatternDialog(BaseDialog):
+    """Dialog for adding or editing a pattern."""
+    
+    def __init__(self, parent, tracker, pattern=None):
+        self.tracker = tracker
+        self.pattern = pattern
+        title = "Edit Pattern" if pattern else "New Pattern"
+        super().__init__(parent, title, width=500, height=300)
+        self.create_form()
+        if pattern:
+            self.load_pattern_data()
+    
+    def create_form(self):
+        """Create the form fields."""
+        main_frame = ctk.CTkFrame(self, fg_color="transparent")
+        main_frame.pack(fill="both", expand=True, padx=30, pady=20)
+        
+        # Pattern Name
+        name_label = ctk.CTkLabel(main_frame, text="Pattern Name *", font=FONTS['body'])
+        name_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
+        
+        self.name_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Aran Sweater")
+        self.name_entry.grid(row=1, column=0, sticky="ew", pady=(0, 15))
+        
+        # Designer
+        designer_label = ctk.CTkLabel(main_frame, text="Designer", font=FONTS['body'])
+        designer_label.grid(row=2, column=0, sticky="w", pady=(0, 5))
+        
+        self.designer_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Alice Starmore")
+        self.designer_entry.grid(row=3, column=0, sticky="ew", pady=(0, 20))
+        
+        # Buttons
+        button_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        button_frame.grid(row=4, column=0, pady=(20, 0))
+        
+        cancel_btn = ctk.CTkButton(
+            button_frame,
+            text="Cancel",
+            command=self.cancel,
+            width=100
+        )
+        cancel_btn.grid(row=0, column=0, padx=5)
+        
+        save_btn = ctk.CTkButton(
+            button_frame,
+            text="Save",
+            command=self.save,
+            width=100
+        )
+        save_btn.grid(row=0, column=1, padx=5)
+        
+        main_frame.grid_columnconfigure(0, weight=1)
+    
+    def load_pattern_data(self):
+        """Load existing pattern data into the form."""
+        self.name_entry.insert(0, self.pattern.pattern_name)
+        if self.pattern.designer:
+            self.designer_entry.insert(0, self.pattern.designer)
+    
+    def save(self):
+        """Save the pattern data."""
+        name = self.name_entry.get().strip()
+        if not name:
+            messagebox.showerror("Error", "Pattern name is required.")
+            return
+        
+        designer = self.designer_entry.get().strip() or None
+        
+        try:
+            pattern = Pattern(pattern_name=name, designer=designer)
+            
+            if self.pattern:  # Editing
+                self.tracker.update_pattern(self.pattern.pattern_id, pattern)
+                messagebox.showinfo("Success", "Pattern updated successfully!")
+            else:  # New
+                pattern_id = self.tracker.create_pattern(pattern)
+                messagebox.showinfo("Success", f"Pattern created successfully!")
+            
+            self.result = True
+            self.destroy()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save pattern: {str(e)}")
