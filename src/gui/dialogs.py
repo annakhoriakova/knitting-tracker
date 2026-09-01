@@ -9,7 +9,7 @@ This module contains dialog windows for:
 - Creating and editing needles
 
 Author: Anna Khoriakova
-Last Updated: 2026-08-30
+Last Updated: 2026-09-01
 ============================================================
 """
 
@@ -293,3 +293,161 @@ class YarnDialog(BaseDialog):
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save yarn: {str(e)}")
+
+
+# ============================================================
+# NEEDLE DIALOG
+# ============================================================
+
+class NeedleDialog(BaseDialog):
+    """Dialog for adding or editing a needle."""
+    
+    def __init__(self, parent, tracker, needle=None):
+        self.tracker = tracker
+        self.needle = needle
+        title = "Edit Needle" if needle else "New Needle"
+        super().__init__(parent, title, width=500, height=600)
+        self.create_form()
+        if needle:
+            self.load_needle_data()
+    
+    def create_form(self):
+        """Create the form fields."""
+        main_frame = ctk.CTkFrame(self, fg_color="transparent")
+        main_frame.pack(fill="both", expand=True, padx=30, pady=20)
+        
+        # Needle Size
+        size_label = ctk.CTkLabel(main_frame, text="Needle Size (mm) *", font=FONTS['body'])
+        size_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
+        
+        self.size_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., 4.0")
+        self.size_entry.grid(row=1, column=0, sticky="ew", pady=(0, 15))
+        
+        # Needle Type
+        type_label = ctk.CTkLabel(main_frame, text="Needle Type *", font=FONTS['body'])
+        type_label.grid(row=2, column=0, sticky="w", pady=(0, 5))
+        
+        self.type_menu = ctk.CTkOptionMenu(
+            main_frame,
+            values=NEEDLE_TYPES,
+            width=200
+        )
+        self.type_menu.grid(row=3, column=0, sticky="ew", pady=(0, 15))
+        self.type_menu.set("Select type...")
+        
+        # Needle Brand
+        brand_label = ctk.CTkLabel(main_frame, text="Brand", font=FONTS['body'])
+        brand_label.grid(row=4, column=0, sticky="w", pady=(0, 5))
+        
+        self.brand_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., KnitPro")
+        self.brand_entry.grid(row=5, column=0, sticky="ew", pady=(0, 15))
+        
+        # Needle Material
+        material_label = ctk.CTkLabel(main_frame, text="Material", font=FONTS['body'])
+        material_label.grid(row=6, column=0, sticky="w", pady=(0, 5))
+        
+        self.material_menu = ctk.CTkOptionMenu(
+            main_frame,
+            values=NEEDLE_MATERIALS,
+            width=200
+        )
+        self.material_menu.grid(row=7, column=0, sticky="ew", pady=(0, 15))
+        self.material_menu.set("Select material...")
+        
+        # Needle Length
+        length_label = ctk.CTkLabel(main_frame, text="Length (inches)", font=FONTS['body'])
+        length_label.grid(row=8, column=0, sticky="w", pady=(0, 5))
+        
+        self.length_menu = ctk.CTkOptionMenu(
+            main_frame,
+            values=NEEDLE_LENGTHS,
+            width=200
+        )
+        self.length_menu.grid(row=9, column=0, sticky="ew", pady=(0, 20))
+        self.length_menu.set("Select length...")
+        
+        # Buttons
+        button_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        button_frame.grid(row=10, column=0, pady=(20, 0))
+        
+        cancel_btn = ctk.CTkButton(
+            button_frame,
+            text="Cancel",
+            command=self.cancel,
+            width=100
+        )
+        cancel_btn.grid(row=0, column=0, padx=5)
+        
+        save_btn = ctk.CTkButton(
+            button_frame,
+            text="Save",
+            command=self.save,
+            width=100
+        )
+        save_btn.grid(row=0, column=1, padx=5)
+        
+        main_frame.grid_columnconfigure(0, weight=1)
+    
+    def load_needle_data(self):
+        """Load existing needle data into the form."""
+        self.size_entry.insert(0, str(self.needle.needle_size_mm))
+        self.type_menu.set(self.needle.needle_type)
+        if self.needle.needle_brand:
+            self.brand_entry.insert(0, self.needle.needle_brand)
+        if self.needle.needle_material:
+            self.material_menu.set(self.needle.needle_material)
+        if self.needle.needle_length:
+            self.length_menu.set(self.needle.needle_length)
+    
+    def save(self):
+        """Save the needle data."""
+        # Validate size
+        size_text = self.size_entry.get().strip()
+        if not size_text:
+            messagebox.showerror("Error", "Needle size is required.")
+            return
+        
+        try:
+            size = float(size_text)
+            if size <= 0:
+                raise ValueError("Size must be positive")
+        except ValueError:
+            messagebox.showerror("Error", "Please enter a valid positive number for size.")
+            return
+        
+        # Validate type
+        needle_type = self.type_menu.get()
+        if needle_type == "Select type...":
+            messagebox.showerror("Error", "Please select a needle type.")
+            return
+        
+        brand = self.brand_entry.get().strip() or None
+        material = self.material_menu.get()
+        if material == "Select material...":
+            material = None
+        
+        length = self.length_menu.get()
+        if length == "Select length...":
+            length = None
+        
+        try:
+            needle = Needle(
+                needle_size_mm=size,
+                needle_type=needle_type,
+                needle_brand=brand,
+                needle_material=material,
+                needle_length=length
+            )
+            
+            if self.needle:  # Editing
+                self.tracker.update_needle(self.needle.needle_id, needle)
+                messagebox.showinfo("Success", "Needle updated successfully!")
+            else:  # New
+                needle_id = self.tracker.create_needle(needle)
+                messagebox.showinfo("Success", f"Needle created successfully!")
+            
+            self.result = True
+            self.destroy()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save needle: {str(e)}")
