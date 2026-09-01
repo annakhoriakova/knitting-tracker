@@ -451,3 +451,226 @@ class NeedleDialog(BaseDialog):
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save needle: {str(e)}")
+
+
+# ============================================================
+# PROJECT DIALOG
+# ============================================================
+
+class ProjectDialog(BaseDialog):
+    """Dialog for adding or editing a project."""
+    
+    def __init__(self, parent, tracker, project=None):
+        self.tracker = tracker
+        self.project = project
+        title = "Edit Project" if project else "New Project"
+        super().__init__(parent, title, width=600, height=700)
+        
+        self.create_form()
+        if project:
+            self.load_project_data()
+    
+    def create_form(self):
+        """Create the form fields."""
+        main_frame = ctk.CTkFrame(self, fg_color="transparent")
+        main_frame.pack(fill="both", expand=True, padx=30, pady=20)
+        
+        # Project Name
+        name_label = ctk.CTkLabel(main_frame, text="Project Name *", font=FONTS['body'])
+        name_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
+        
+        self.name_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., My Aran Sweater")
+        self.name_entry.grid(row=1, column=0, sticky="ew", pady=(0, 15))
+        
+        # Pattern selection
+        pattern_label = ctk.CTkLabel(main_frame, text="Pattern *", font=FONTS['body'])
+        pattern_label.grid(row=2, column=0, sticky="w", pady=(0, 5))
+        
+        patterns = self.tracker.get_all_patterns()
+        pattern_names = [p.pattern_name for p in patterns]
+        if not pattern_names:
+            pattern_names = ["No patterns available - please add one first"]
+        
+        self.pattern_menu = ctk.CTkOptionMenu(
+            main_frame,
+            values=pattern_names,
+            width=200
+        )
+        self.pattern_menu.grid(row=3, column=0, sticky="ew", pady=(0, 15))
+        self.patterns = patterns
+        
+        # Needle selection
+        needle_label = ctk.CTkLabel(main_frame, text="Primary Needle *", font=FONTS['body'])
+        needle_label.grid(row=4, column=0, sticky="w", pady=(0, 5))
+        
+        needles = self.tracker.get_all_needles()
+        needle_names = [f"{n.needle_size_mm}mm {n.needle_type}" for n in needles]
+        if not needle_names:
+            needle_names = ["No needles available - please add one first"]
+        
+        self.needle_menu = ctk.CTkOptionMenu(
+            main_frame,
+            values=needle_names,
+            width=200
+        )
+        self.needle_menu.grid(row=5, column=0, sticky="ew", pady=(0, 15))
+        self.needles = needles
+        
+        # Status
+        status_label = ctk.CTkLabel(main_frame, text="Status", font=FONTS['body'])
+        status_label.grid(row=6, column=0, sticky="w", pady=(0, 5))
+        
+        self.status_menu = ctk.CTkOptionMenu(
+            main_frame,
+            values=STATUS_ORDER,
+            width=200
+        )
+        self.status_menu.grid(row=7, column=0, sticky="ew", pady=(0, 15))
+        self.status_menu.set("Planning")
+        
+        # Recipient
+        recipient_label = ctk.CTkLabel(main_frame, text="Recipient", font=FONTS['body'])
+        recipient_label.grid(row=8, column=0, sticky="w", pady=(0, 5))
+        
+        self.recipient_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Me, Gift, or name")
+        self.recipient_entry.grid(row=9, column=0, sticky="ew", pady=(0, 15))
+        
+        # Start Date
+        self.start_date_auto = ctk.CTkCheckBox(
+            main_frame,
+            text="Start today",
+            onvalue=True,
+            offvalue=False
+        )
+        self.start_date_auto.grid(row=10, column=0, sticky="w", pady=(0, 5))
+        self.start_date_auto.select()
+        
+        # Buttons
+        button_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        button_frame.grid(row=11, column=0, pady=(20, 0))
+        
+        cancel_btn = ctk.CTkButton(
+            button_frame,
+            text="Cancel",
+            command=self.cancel,
+            width=100
+        )
+        cancel_btn.grid(row=0, column=0, padx=5)
+        
+        save_btn = ctk.CTkButton(
+            button_frame,
+            text="Save",
+            command=self.save,
+            width=100
+        )
+        save_btn.grid(row=0, column=1, padx=5)
+        
+        # Configure grid
+        main_frame.grid_columnconfigure(0, weight=1)
+    
+    def load_project_data(self):
+        """Load existing project data into the form."""
+        self.name_entry.insert(0, self.project.project_name)
+        
+        # Set pattern
+        pattern = self.tracker.get_pattern(self.project.pattern_id)
+        if pattern:
+            try:
+                self.pattern_menu.set(pattern.pattern_name)
+            except:
+                pass
+        
+        # Set needle
+        needle = next(
+            (n for n in self.needles if n.needle_id == self.project.needle_id),
+            None
+        )
+        if needle:
+            needle_text = f"{needle.needle_size_mm}mm {needle.needle_type}"
+            try:
+                self.needle_menu.set(needle_text)
+            except:
+                pass
+        
+        # Set status
+        self.status_menu.set(self.project.status)
+        
+        # Set recipient
+        if self.project.recipient:
+            self.recipient_entry.insert(0, self.project.recipient)
+        
+        # Uncheck start date auto if there's a start date
+        if self.project.start_date:
+            self.start_date_auto.deselect()
+    
+    def save(self):
+        """Save the project data."""
+        # Validate required fields
+        name = self.name_entry.get().strip()
+        if not name:
+            messagebox.showerror("Error", "Project name is required.")
+            return
+        
+        # Get selected pattern
+        pattern_name = self.pattern_menu.get()
+        if pattern_name == "No patterns available - please add one first" or not self.patterns:
+            messagebox.showerror("Error", "Please add a pattern first.")
+            return
+        
+        pattern = next((p for p in self.patterns if p.pattern_name == pattern_name), None)
+        if not pattern:
+            messagebox.showerror("Error", "Please select a valid pattern.")
+            return
+        
+        # Get selected needle
+        if not self.needles:
+            messagebox.showerror("Error", "Please add a needle first.")
+            return
+        
+        needle_text = self.needle_menu.get()
+        if needle_text == "No needles available - please add one first":
+            messagebox.showerror("Error", "Please add a needle first.")
+            return
+        
+        needle = next(
+            (n for n in self.needles if f"{n.needle_size_mm}mm {n.needle_type}" == needle_text),
+            None
+        )
+        if not needle:
+            messagebox.showerror("Error", "Please select a valid needle.")
+            return
+        
+        # Get form data
+        status = self.status_menu.get()
+        recipient = self.recipient_entry.get().strip() or None
+        
+        # Get start date
+        start_date = None
+        if self.start_date_auto.get() == 1:
+            start_date = datetime.now().strftime("%Y-%m-%d")
+        
+        try:
+            project = Project(
+                project_name=name,
+                start_date=start_date,
+                end_date=None if status != "Finished" else datetime.now().strftime("%Y-%m-%d"),
+                status=status,
+                recipient=recipient,
+                pattern_id=pattern.pattern_id,
+                needle_id=needle.needle_id
+            )
+            
+            if self.project:  # Editing
+                # Update status
+                self.tracker.update_project_status(self.project.project_id, status)
+                messagebox.showinfo("Success", "Project updated successfully!")
+            else:  # New
+                project_id = self.tracker.create_project(project)
+                messagebox.showinfo("Success", f"Project created successfully!")
+            
+            self.result = True
+            self.destroy()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save project: {str(e)}")
+            
