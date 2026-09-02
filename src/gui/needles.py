@@ -9,7 +9,7 @@ CRUD operations for needles:
 - Delete needles (with safety checks)
 
 Author: Anna Khoriakova
-Last Updated: 2026-09-01
+Last Updated: 2026-09-02
 ============================================================
 """
 
@@ -175,7 +175,7 @@ class NeedlesView(ctk.CTkFrame):
         if project_count > 0:
             tooltip = ctk.CTkLabel(
                 actions_frame,
-                text="(in use - cannot delete)",
+                text="(in use: cannot delete)",
                 font=FONTS['body_small'],
                 text_color=COLORS['text_disabled']
             )
