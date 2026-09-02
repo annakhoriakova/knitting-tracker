@@ -14,7 +14,7 @@ Last Updated: 2026-09-01
 
 import customtkinter as ctk
 from src.crud import KnittingTracker
-from src.gui.styles import COLORS, FONTS, get_status_color, get_status_display
+from src.gui.styles import COLOURS, FONTS, get_status_colour, get_status_display
 
 
 class DashboardView(ctk.CTkFrame):
@@ -24,4 +24,4 @@ class DashboardView(ctk.CTkFrame):
     This view provides a high-level overview of all knitting projects
     with visual statistics and a list of recent projects.
     """
-            
+    
