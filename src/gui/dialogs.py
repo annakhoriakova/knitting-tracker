@@ -176,12 +176,12 @@ class YarnDialog(BaseDialog):
         self.line_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Rios")
         self.line_entry.grid(row=3, column=0, sticky="ew", pady=(0, 15))
         
-        # Colour Name
-        colour_label = ctk.CTkLabel(main_frame, text="Colour Name", font=FONTS['body'])
-        colour_label.grid(row=4, column=0, sticky="w", pady=(0, 5))
+        # Color Name
+        color_label = ctk.CTkLabel(main_frame, text="Color Name", font=FONTS['body'])
+        color_label.grid(row=4, column=0, sticky="w", pady=(0, 5))
         
-        self.colour_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Whale's Road")
-        self.colour_entry.grid(row=5, column=0, sticky="ew", pady=(0, 15))
+        self.color_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Whale's Road")
+        self.color_entry.grid(row=5, column=0, sticky="ew", pady=(0, 15))
         
         # Weight Category
         weight_label = ctk.CTkLabel(main_frame, text="Weight Category", font=FONTS['body'])
@@ -236,8 +236,8 @@ class YarnDialog(BaseDialog):
         self.brand_entry.insert(0, self.yarn.yarn_brand)
         if self.yarn.yarn_line:
             self.line_entry.insert(0, self.yarn.yarn_line)
-        if self.yarn.colour_name:
-            self.colour_entry.insert(0, self.yarn.colour_name)
+        if self.yarn.color_name:
+            self.color_entry.insert(0, self.yarn.color_name)
         if self.yarn.weight_category:
             self.weight_menu.set(self.yarn.weight_category)
         if self.yarn.total_yardage:
@@ -253,7 +253,7 @@ class YarnDialog(BaseDialog):
             return
         
         line = self.line_entry.get().strip() or None
-        colour = self.colour_entry.get().strip() or None
+        color = self.color_entry.get().strip() or None
         weight = self.weight_menu.get()
         if weight == "Select weight...":
             weight = None
@@ -275,7 +275,7 @@ class YarnDialog(BaseDialog):
             yarn = Yarn(
                 yarn_brand=brand,
                 yarn_line=line,
-                colour_name=colour,
+                color_name=color,
                 weight_category=weight,
                 total_yardage=yardage,
                 dye_lot=dye_lot

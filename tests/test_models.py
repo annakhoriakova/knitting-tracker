@@ -151,7 +151,7 @@ class TestYarn:
         
         Verifies that:
         - All yarn attributes are correctly stored
-        - Dye lot is preserved (important for colour matching)
+        - Dye lot is preserved (important for color matching)
         - Yardage is stored as integer for calculations
         - Weight category is stored for gauge matching
         """
@@ -160,7 +160,7 @@ class TestYarn:
             yarn_id=1,
             yarn_brand="Malabrigo",
             yarn_line="Rios",
-            colour_name="Whale's Road",
+            color_name="Whale's Road",
             dye_lot="12345",
             weight_category="Worsted",
             total_yardage=210
@@ -170,7 +170,7 @@ class TestYarn:
         assert yarn.yarn_id == 1
         assert yarn.yarn_brand == "Malabrigo"
         assert yarn.yarn_line == "Rios"
-        assert yarn.colour_name == "Whale's Road"
+        assert yarn.color_name == "Whale's Road"
         assert yarn.dye_lot == "12345"
         assert yarn.weight_category == "Worsted"
         assert yarn.total_yardage == 210
@@ -192,7 +192,7 @@ class TestYarn:
         
         # Assert all other fields are None (not set yet)
         assert yarn.yarn_line is None
-        assert yarn.colour_name is None
+        assert yarn.color_name is None
         assert yarn.dye_lot is None
         assert yarn.weight_category is None
         assert yarn.total_yardage is None

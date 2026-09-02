@@ -217,7 +217,7 @@ class KnittingTracker:
             yarn = Yarn(
                 yarn_brand="Malabrigo",
                 yarn_line="Rios",
-                colour_name="Whale's Road",
+                color_name="Whale's Road",
                 weight_category="Worsted",
                 total_yardage=210
             )
@@ -227,12 +227,12 @@ class KnittingTracker:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO YARN (
-                    yarn_brand, yarn_line, colour_name, dye_lot, 
+                    yarn_brand, yarn_line, color_name, dye_lot, 
                     weight_category, total_yardage
                 )
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
-                yarn.yarn_brand, yarn.yarn_line, yarn.colour_name, yarn.dye_lot,
+                yarn.yarn_brand, yarn.yarn_line, yarn.color_name, yarn.dye_lot,
                 yarn.weight_category, yarn.total_yardage
             ))
             conn.commit()
@@ -249,7 +249,7 @@ class KnittingTracker:
         Example:
             yarns = tracker.get_all_yarns()
             for yarn in yarns:
-                print(f"{yarn.yarn_brand} {yarn.yarn_line} - {yarn.colour_name}")
+                print(f"{yarn.yarn_brand} {yarn.yarn_line} - {yarn.color_name}")
         """
         with self.db.get_connection() as conn:
             cursor = conn.cursor()

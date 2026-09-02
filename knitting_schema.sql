@@ -52,7 +52,7 @@ CREATE TABLE YARN (
     yarn_id          INTEGER PRIMARY KEY AUTOINCREMENT,
     yarn_brand       TEXT NOT NULL,                    -- Brand name (e.g., "Malabrigo")
     yarn_line        TEXT,                             -- Line/product name (e.g., "Rios")
-    colour_name      TEXT,                             -- Colourway name
+    color_name      TEXT,                              -- Colorway name
     dye_lot          TEXT,                             -- For matching yarn dye lots
     weight_category  TEXT,                             -- DK, Worsted, Fingering, etc.
     total_yardage    INTEGER                           -- Yards per skein

@@ -3,9 +3,9 @@
 Styles and Theme Configuration for Knitting Tracker GUI
 ============================================================
 This module defines all visual styling for the application:
-- Colour schemes (dark/light mode support)
+- Color schemes (dark/light mode support)
 - Font settings
-- Status colours and display names
+- Status colors and display names
 - Theme configuration
 
 Author: Anna Khoriakova
@@ -17,25 +17,25 @@ import customtkinter as ctk
 
 # Configure default theme
 ctk.set_appearance_mode("dark")      # Options: "dark", "light", "system"
-ctk.set_default_colour_theme("blue")  # Options: "blue", "green", "dark-blue"
+ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"
 
 # ============================================================
-# COLOUR SCHEMES
+# COLOR SCHEMES
 # ============================================================
 
-COLOURS = {
-    # Primary brand colours
+COLORS = {
+    # Primary brand colors
     'primary': '#2B6A9E',
     'primary_light': '#3B8AC4',
     'primary_dark': '#1A4A6E',
     
-    # Status colours
+    # Status colors
     'success': '#2E7D32',
     'warning': '#ED6C02',
     'danger': '#D32F2F',
     'info': '#0288D1',
     
-    # Neutral colours (dark mode default)
+    # Neutral colors (dark mode default)
     'background': '#1A1A1A',
     'surface': '#2D2D2D',
     'surface_light': '#3D3D3D',
@@ -66,8 +66,8 @@ FONTS = {
 # STATUS CONFIGURATIONS
 # ============================================================
 
-# Colour mapping for project statuses
-STATUS_COLOURS = {
+# Color mapping for project statuses
+STATUS_COLORS = {
     'Planning': '#ED6C02',      # Orange - planning phase
     'WIP': '#2B6A9E',           # Blue - work in progress
     'Blocking': '#9C27B0',      # Purple - blocking/finishing
@@ -128,17 +128,17 @@ NEEDLE_MATERIALS = [
 # HELPER FUNCTIONS
 # ============================================================
 
-def get_status_colour(status: str) -> str:
+def get_status_color(status: str) -> str:
     """
-    Get the colour for a given project status.
+    Get the color for a given project status.
     
     Args:
         status: The project status string
     
     Returns:
-        str: The hex colour code, or grey if status not found
+        str: The hex color code, or grey if status not found
     """
-    return STATUS_COLOURS.get(status, '#757575')
+    return STATUS_COLORS.get(status, '#757575')
 
 def get_status_display(status: str) -> str:
     """

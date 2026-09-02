@@ -70,7 +70,7 @@ class TestCrudOperations:
             yarn_id INTEGER PRIMARY KEY AUTOINCREMENT,
             yarn_brand TEXT NOT NULL,
             yarn_line TEXT,
-            colour_name TEXT,
+            color_name TEXT,
             dye_lot TEXT,
             weight_category TEXT,
             total_yardage INTEGER
@@ -128,7 +128,7 @@ class TestCrudOperations:
         return Yarn(
             yarn_brand="TestBrand",
             yarn_line="TestLine",
-            colour_name="TestColor",
+            color_name="TestColor",
             dye_lot="123",
             weight_category="Worsted",
             total_yardage=200
@@ -285,7 +285,7 @@ class TestCrudOperations:
         yarn2 = Yarn(
             yarn_brand="Brand2",
             yarn_line="Line2",
-            colour_name="Color2",
+            color_name="Color2",
             weight_category="DK",
             total_yardage=150
         )
@@ -563,7 +563,7 @@ class TestCrudOperations:
         yarn2 = Yarn(
             yarn_brand="Brand2",
             yarn_line="Line2",
-            colour_name="Color2",
+            color_name="Color2",
             weight_category="DK",
             total_yardage=150
         )
@@ -638,7 +638,7 @@ class TestCrudOperations:
         Test adding multiple yarns to the same project.
         
         This is common for striped projects, colorwork, or when
-        using multiple colours in a single project.
+        using multiple colors in a single project.
         """
         # Setup: Create dependencies
         pattern_id = tracker.create_pattern(sample_pattern)
@@ -657,7 +657,7 @@ class TestCrudOperations:
             yarn = Yarn(
                 yarn_brand=f"Brand{i}",
                 yarn_line=f"Line{i}",
-                colour_name=f"Colour{i}",
+                color_name=f"Color{i}",
                 weight_category="Worsted",
                 total_yardage=200
             )

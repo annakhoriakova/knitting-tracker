@@ -92,7 +92,7 @@ class TestDatabase:
             yarn_id INTEGER PRIMARY KEY AUTOINCREMENT,
             yarn_brand TEXT NOT NULL,
             yarn_line TEXT,
-            colour_name TEXT,
+            color_name TEXT,
             dye_lot TEXT,
             weight_category TEXT,
             total_yardage INTEGER
