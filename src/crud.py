@@ -466,6 +466,114 @@ class KnittingTracker:
             conn.commit()
             return True
 
+    def delete_project(self, project_id: int) -> bool:
+        """
+        Delete a project and all its associated yarn relationships.
+        
+        This method:
+        1. Deletes all entries in PROJECT_YARN for this project (ON DELETE CASCADE)
+        2. Deletes the project itself from the PROJECT table
+        
+        The ON DELETE CASCADE foreign key constraint on PROJECT_YARN ensures
+        that yarn associations are automatically removed when a project is deleted.
+        
+        Args:
+            project_id: The ID of the project to delete.
+        
+        Returns:
+            bool: True if the project was found and deleted.
+        
+        Raises:
+            sqlite3.IntegrityError: If there are foreign key constraints that prevent deletion.
+        
+        Example:
+            if tracker.delete_project(1):
+                print("Project and all yarn associations deleted successfully!")
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Delete the project
+            # The PROJECT_YARN entries will be automatically deleted due to ON DELETE CASCADE
+            cursor.execute("DELETE FROM PROJECT WHERE project_id = ?", (project_id,))
+            conn.commit()
+            
+            # Return True if any rows were affected (i.e., project was found and deleted)
+            return cursor.rowcount > 0
+
+    def get_projects_by_pattern(self, pattern_id: int) -> List[Project]:
+        """
+        Retrieve all projects that use a specific pattern.
+        
+        This is useful for checking if a pattern is in use before deletion.
+        
+        Args:
+            pattern_id: The ID of the pattern to search for.
+        
+        Returns:
+            List[Project]: A list of projects using the pattern.
+        
+        Example:
+            projects = tracker.get_projects_by_pattern(1)
+            if projects:
+                print(f"Pattern is used in {len(projects)} projects")
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM PROJECT 
+                WHERE pattern_id = ?
+                ORDER BY project_name
+            """, (pattern_id,))
+            rows = cursor.fetchall()
+            return [Project(**dict(row)) for row in rows]
+
+    def get_projects_by_needle(self, needle_id: int) -> List[Project]:
+        """
+        Retrieve all projects that use a specific needle.
+        
+        This is useful for checking if a needle is in use before deletion.
+        
+        Args:
+            needle_id: The ID of the needle to search for.
+        
+        Returns:
+            List[Project]: A list of projects using the needle.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM PROJECT 
+                WHERE needle_id = ?
+                ORDER BY project_name
+            """, (needle_id,))
+            rows = cursor.fetchall()
+            return [Project(**dict(row)) for row in rows]
+
+    def get_projects_by_yarn(self, yarn_id: int) -> List[Project]:
+        """
+        Retrieve all projects that use a specific yarn.
+        
+        This is useful for checking if a yarn is in use before deletion.
+        
+        Args:
+            yarn_id: The ID of the yarn to search for.
+        
+        Returns:
+            List[Project]: A list of projects using the yarn.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT DISTINCT p.* 
+                FROM PROJECT p
+                JOIN PROJECT_YARN py ON p.project_id = py.project_id
+                WHERE py.yarn_id = ?
+                ORDER BY p.project_name
+            """, (yarn_id,))
+            rows = cursor.fetchall()
+            return [Project(**dict(row)) for row in rows]
+
     # ============ SEARCH & FILTER ============
 
     def get_active_projects(self) -> List[Project]:
