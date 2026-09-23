@@ -9,7 +9,7 @@ The main window of the knitting tracker application with:
 - Application lifecycle management
 
 Author: Anna Khoriakova
-Last Updated: 2026-09-02
+Last Updated: 2026-09-23
 ============================================================
 """
 
@@ -45,6 +45,7 @@ class MainWindow(ctk.CTk):
         self.title("Knitting Tracker")
         self.geometry("1200x700")
         self.minsize(1000, 600)
+        self.configure(fg_color=COLORS['background'])
         
         # Configure grid layout
         self.grid_columnconfigure(1, weight=1)
@@ -69,7 +70,7 @@ class MainWindow(ctk.CTk):
         - Version information
         """
         # Sidebar frame with dark background
-        self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
+        self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0, fg_color=COLORS['surface'])
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_rowconfigure(8, weight=1)  # Push footer to bottom
         
@@ -101,7 +102,10 @@ class MainWindow(ctk.CTk):
                 command=command,
                 corner_radius=10,
                 height=40,
-                font=FONTS['body']
+                font=FONTS['body'],
+                fg_color=COLORS['button'],
+                hover_color=COLORS['button_hover'],
+                text_color=COLORS['button_text']
             )
             btn.grid(row=i, column=0, padx=20, pady=5, sticky="ew")
             self.nav_buttons.append(btn)
@@ -111,7 +115,10 @@ class MainWindow(ctk.CTk):
             self.sidebar,
             text="Dark Mode",
             command=self.toggle_theme,
-            font=FONTS['body_small']
+            font=FONTS['body_small'],
+            progress_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark']
         )
         self.theme_toggle.grid(row=9, column=0, padx=20, pady=20, sticky="s")
         self.theme_toggle.select()  # Dark mode by default
