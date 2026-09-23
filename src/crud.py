@@ -16,7 +16,7 @@ Dependencies:
     - Dataclass models from src.models for data representation
 
 Author: Anna Khoriakova
-Last Updated: 2026-08-21
+Last Updated: 2026-09-23
 ============================================================
 """
 
@@ -136,6 +136,48 @@ class KnittingTracker:
             rows = cursor.fetchall()
             return [Pattern(**dict(row)) for row in rows]
 
+    def update_pattern(self, pattern_id: int, pattern: Pattern) -> bool:
+        """
+        Update an existing pattern's details.
+
+        Args:
+            pattern_id: The ID of the pattern to update.
+            pattern: A Pattern dataclass instance with the new details.
+
+        Returns:
+            bool: True if a pattern was found and updated.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE PATTERN
+                SET pattern_name = ?, designer = ?
+                WHERE pattern_id = ?
+            """, (
+                pattern.pattern_name, pattern.designer, pattern_id
+            ))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def delete_pattern(self, pattern_id: int) -> bool:
+        """
+        Delete a pattern from the database.
+
+        Will raise sqlite3.IntegrityError (message contains "FOREIGN KEY")
+        if the pattern is still referenced by any project.
+
+        Args:
+            pattern_id: The ID of the pattern to delete.
+
+        Returns:
+            bool: True if a pattern was found and deleted.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM PATTERN WHERE pattern_id = ?", (pattern_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+
     # ============ NEEDLE OPERATIONS ============
 
     def create_needle(self, needle: Needle) -> int:
@@ -197,6 +239,50 @@ class KnittingTracker:
             rows = cursor.fetchall()
             return [Needle(**dict(row)) for row in rows]
 
+    def update_needle(self, needle_id: int, needle: Needle) -> bool:
+        """
+        Update an existing needle's details.
+
+        Args:
+            needle_id: The ID of the needle to update.
+            needle: A Needle dataclass instance with the new details.
+
+        Returns:
+            bool: True if a needle was found and updated.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE NEEDLE
+                SET needle_size_mm = ?, needle_type = ?, needle_material = ?,
+                    needle_length = ?, needle_brand = ?
+                WHERE needle_id = ?
+            """, (
+                needle.needle_size_mm, needle.needle_type, needle.needle_material,
+                needle.needle_length, needle.needle_brand, needle_id
+            ))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def delete_needle(self, needle_id: int) -> bool:
+        """
+        Delete a needle from the database.
+
+        Will raise sqlite3.IntegrityError (message contains "FOREIGN KEY")
+        if the needle is still referenced by any project.
+
+        Args:
+            needle_id: The ID of the needle to delete.
+
+        Returns:
+            bool: True if a needle was found and deleted.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM NEEDLE WHERE needle_id = ?", (needle_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+
     # ============ YARN OPERATIONS ============
 
     def create_yarn(self, yarn: Yarn) -> int:
@@ -256,6 +342,50 @@ class KnittingTracker:
             cursor.execute("SELECT * FROM YARN ORDER BY yarn_brand, yarn_line")
             rows = cursor.fetchall()
             return [Yarn(**dict(row)) for row in rows]
+
+    def update_yarn(self, yarn_id: int, yarn: Yarn) -> bool:
+        """
+        Update an existing yarn's details.
+
+        Args:
+            yarn_id: The ID of the yarn to update.
+            yarn: A Yarn dataclass instance with the new details.
+
+        Returns:
+            bool: True if a yarn was found and updated.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE YARN
+                SET yarn_brand = ?, yarn_line = ?, color_name = ?, dye_lot = ?,
+                    weight_category = ?, total_yardage = ?
+                WHERE yarn_id = ?
+            """, (
+                yarn.yarn_brand, yarn.yarn_line, yarn.color_name, yarn.dye_lot,
+                yarn.weight_category, yarn.total_yardage, yarn_id
+            ))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def delete_yarn(self, yarn_id: int) -> bool:
+        """
+        Delete a yarn from the database.
+
+        Will raise sqlite3.IntegrityError (message contains "FOREIGN KEY")
+        if the yarn is still used in any project.
+
+        Args:
+            yarn_id: The ID of the yarn to delete.
+
+        Returns:
+            bool: True if a yarn was found and deleted.
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM YARN WHERE yarn_id = ?", (yarn_id,))
+            conn.commit()
+            return cursor.rowcount > 0
 
     # ============ PROJECT OPERATIONS ============
 
@@ -604,3 +734,4 @@ class KnittingTracker:
             """)
             rows = cursor.fetchall()
             return [Project(**dict(row)) for row in rows]
+        
