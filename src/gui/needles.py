@@ -9,7 +9,7 @@ CRUD operations for needles:
 - Delete needles (with safety checks)
 
 Author: Anna Khoriakova
-Last Updated: 2026-09-02
+Last Updated: 2026-09-23
 ============================================================
 """
 
@@ -56,7 +56,10 @@ class NeedlesView(ctk.CTkFrame):
             command=self.open_add_needle,
             font=FONTS['button'],
             height=40,
-            width=150
+            width=150,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         add_btn.grid(row=0, column=1, sticky="e")
     
@@ -96,7 +99,7 @@ class NeedlesView(ctk.CTkFrame):
             needle: The needle object to display
             index: The row index for grid positioning
         """
-        card = ctk.CTkFrame(self.list_frame, corner_radius=15)
+        card = ctk.CTkFrame(self.list_frame, corner_radius=15, fg_color=COLORS['surface'])
         card.grid(row=index, column=0, sticky="ew", pady=8)
         card.grid_columnconfigure(0, weight=1)
         
@@ -155,7 +158,10 @@ class NeedlesView(ctk.CTkFrame):
             text="Edit",
             command=lambda: self.open_edit_needle(needle),
             width=80,
-            font=FONTS['body_small']
+            font=FONTS['body_small'],
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         edit_btn.grid(row=0, column=0, padx=(0, 5))
         
@@ -214,4 +220,3 @@ class NeedlesView(ctk.CTkFrame):
                     )
                 else:
                     messagebox.showerror("Error", f"Failed to delete needle: {str(e)}")
-                    
