@@ -11,7 +11,7 @@ The database layer works with the models defined in models.py
 and the CRUD operations in crud.py.
 
 Author: Anna Khoriakova
-Last Updated: 2026-08-21
+Last Updated: 2026-09-23
 ============================================================
 """
 
@@ -68,7 +68,15 @@ class Database:
         with self.get_connection() as conn:
             # Create a cursor object to execute SQL commands
             cursor = conn.cursor()
-            
+
+            # Check whether the schema has already been created
+            cursor.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='PROJECT'"
+            )
+            if cursor.fetchone() is not None:
+                # Tables already exist
+                return
+
             # Open the schema file in read mode ('r')
             # "knitting_schema.sql" contains all CREATE TABLE statements
             with open("knitting_schema.sql", "r") as f:
@@ -77,10 +85,11 @@ class Database:
             
             # Execute the entire SQL schema as a script
             # This runs all the CREATE TABLE, DROP TABLE, and CREATE INDEX statements
-            # The schema file includes DROP statements to clean up existing tables
-            # and CREATE statements to build the database structure fresh
+            # (DROP statements only matter the very first time. After that this
+            # method returns early above and never reaches this point again)
             cursor.executescript(schema)
             
             # Commit (save) the changes to the database permanently
             # This makes the table creation permanent
             conn.commit()
+            
