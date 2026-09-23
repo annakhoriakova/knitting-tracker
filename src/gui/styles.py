@@ -9,42 +9,52 @@ This module defines all visual styling for the application:
 - Theme configuration
 
 Author: Anna Khoriakova
-Last Updated: 2026-08-24
+Last Updated: 2026-09-23
 ============================================================
 """
 
 import customtkinter as ctk
 
 # Configure default theme
-ctk.set_appearance_mode("dark")      # Options: "dark", "light", "system"
-ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"
+ctk.set_appearance_mode("dark")      
+ctk.set_default_color_theme("blue")  # CTk's built-in accent theme 
+                                      
 
 # ============================================================
 # COLOR SCHEMES
 # ============================================================
+# Each value below is a (light_mode_color, dark_mode_color) tuple.
+# Light mode = light pink, dark mode = dark pink.
 
 COLORS = {
     # Primary brand colors
-    'primary': '#2B6A9E',
-    'primary_light': '#3B8AC4',
-    'primary_dark': '#1A4A6E',
-    
+    'primary': ('#8C2F52', '#F5A9C0'),
+    'primary_light': ('#A6486B', '#F7BED0'),
+    'primary_dark': ('#732541', '#F0839E'),
+
+    # Button colors: light mode = dark pink buttons, dark mode = pastel pink buttons
+    'button': ('#8C2F52', '#F5A9C0'),
+    'button_hover': ('#732541', '#F0839E'),
+    'button_text': ('#FFEAF1', '#4A1F2B'),
+
     # Status colors
-    'success': '#2E7D32',
-    'warning': '#ED6C02',
-    'danger': '#D32F2F',
-    'info': '#0288D1',
-    
-    # Neutral colors (dark mode default)
-    'background': '#1A1A1A',
-    'surface': '#2D2D2D',
-    'surface_light': '#3D3D3D',
-    'surface_dark': '#1E1E1E',
-    'text': '#FFFFFF',
-    'text_secondary': '#AAAAAA',
-    'text_disabled': '#666666',
-    'border': '#404040',
-    'border_light': '#505050',
+    'success': ('#3F8F5B', '#4CAF6D'),
+    'warning': ('#D98A2B', '#E8A23F'),
+    'danger': ('#C0395C', '#D9486B'),
+    'info': ('#3C8FB0', '#4FA8C9'),
+
+    # Screen/surface colors: light mode = pastel pink screen, dark mode =
+    # dark pink screen (opposite of the buttons above for contrast)
+    'background': ('#FBE4EC', '#2B0F1C'),
+    'surface': ('#FFD9E6', '#3A1526'),
+    'surface_light': ('#FFCCE0', '#4A1B30'),
+    'surface_dark': ('#F8BFD4', '#210B15'),
+    'text': ('#4A1F2B', '#FADCE6'),
+    'text_secondary': ('#8C5768', '#D79CB0'),
+    'text_disabled': ('#C79AAA', '#7A4A57'),
+    'placeholder': ('#E0A9BF', '#A9647D'),
+    'border': ('#F3B8CB', '#5C2A38'),
+    'border_light': ('#FAD1DE', '#6E3644'),
 }
 
 # ============================================================
