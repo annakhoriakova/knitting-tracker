@@ -10,7 +10,7 @@ This view provides CRUD operations for projects:
 - Delete projects
 
 Author: Anna Khoriakova
-Last Updated: 2026-09-02
+Last Updated: 2026-09-23
 ============================================================
 """
 
@@ -22,7 +22,7 @@ from src.gui.styles import (
     COLORS, FONTS, STATUS_ORDER,
     get_status_color, get_status_display
 )
-from src.gui.dialogs import ProjectDialog
+from src.gui.dialogs import ProjectDialog, ProjectDetailDialog
 
 
 class ProjectsView(ctk.CTkFrame):
@@ -69,7 +69,10 @@ class ProjectsView(ctk.CTkFrame):
             command=self.open_add_project,
             font=FONTS['button'],
             height=40,
-            width=150
+            width=150,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         add_btn.grid(row=0, column=1, sticky="e")
     
@@ -91,7 +94,14 @@ class ProjectsView(ctk.CTkFrame):
             filter_frame,
             values=["All"] + STATUS_ORDER,
             command=self.on_filter_changed,
-            width=150
+            width=150,
+            fg_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark'],
+            text_color=COLORS['button_text'],
+            dropdown_fg_color=COLORS['surface'],
+            dropdown_text_color=COLORS['text'],
+            dropdown_hover_color=COLORS['button']
         )
         self.status_filter.grid(row=0, column=1, padx=(0, 20))
         
@@ -101,7 +111,10 @@ class ProjectsView(ctk.CTkFrame):
             text="Refresh",
             command=self.load_projects,
             width=100,
-            font=FONTS['body_small']
+            font=FONTS['body_small'],
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         refresh_btn.grid(row=0, column=2, sticky="e")
     
@@ -150,7 +163,7 @@ class ProjectsView(ctk.CTkFrame):
             project: The project object to display
             index: The row index for grid positioning
         """
-        card = ctk.CTkFrame(self.list_frame, corner_radius=15)
+        card = ctk.CTkFrame(self.list_frame, corner_radius=15, fg_color=COLORS['surface'])
         card.grid(row=index, column=0, sticky="ew", pady=8)
         card.grid_columnconfigure(0, weight=1)
         
@@ -213,15 +226,31 @@ class ProjectsView(ctk.CTkFrame):
         actions_frame = ctk.CTkFrame(card, fg_color="transparent")
         actions_frame.grid(row=2, column=0, sticky="ew", padx=15, pady=(5, 10))
         
+        # Details button (view-only)
+        details_btn = ctk.CTkButton(
+            actions_frame,
+            text="Details",
+            command=lambda: self.open_project_details(project),
+            width=80,
+            font=FONTS['body_small'],
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
+        )
+        details_btn.grid(row=0, column=0, padx=(0, 5))
+        
         # Edit button
         edit_btn = ctk.CTkButton(
             actions_frame,
             text="Edit",
             command=lambda: self.open_edit_project(project),
             width=80,
-            font=FONTS['body_small']
+            font=FONTS['body_small'],
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
-        edit_btn.grid(row=0, column=0, padx=(0, 5))
+        edit_btn.grid(row=0, column=1, padx=5)
         
         # Status update dropdown
         status_menu = ctk.CTkOptionMenu(
@@ -229,10 +258,17 @@ class ProjectsView(ctk.CTkFrame):
             values=STATUS_ORDER,
             command=lambda status, p=project: self.update_status(p, status),
             width=120,
-            font=FONTS['body_small']
+            font=FONTS['body_small'],
+            fg_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark'],
+            text_color=COLORS['button_text'],
+            dropdown_fg_color=COLORS['surface'],
+            dropdown_text_color=COLORS['text'],
+            dropdown_hover_color=COLORS['button']
         )
         status_menu.set(project.status)
-        status_menu.grid(row=0, column=1, padx=5)
+        status_menu.grid(row=0, column=2, padx=5)
         
         # Delete button
         delete_btn = ctk.CTkButton(
@@ -244,7 +280,7 @@ class ProjectsView(ctk.CTkFrame):
             fg_color=COLORS['danger'],
             hover_color='#B71C1C'
         )
-        delete_btn.grid(row=0, column=2, padx=(5, 0))
+        delete_btn.grid(row=0, column=3, padx=(5, 0))
     
     def on_filter_changed(self, choice):
         """Handle filter dropdown changes."""
@@ -263,6 +299,11 @@ class ProjectsView(ctk.CTkFrame):
         self.wait_window(dialog)
         if dialog.result:
             self.load_projects()
+    
+    def open_project_details(self, project):
+        """Open a read-only dialog showing full project details."""
+        dialog = ProjectDetailDialog(self, self.tracker, project)
+        self.wait_window(dialog)
     
     def update_status(self, project, new_status):
         """Update a project's status."""
