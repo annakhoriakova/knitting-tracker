@@ -8,7 +8,7 @@ The dashboard provides an overview of the knitting tracker:
 - Quick status overview
 
 Author: Anna Khoriakova
-Last Updated: 2026-09-01
+Last Updated: 2026-09-23
 ============================================================
 """
 
@@ -78,13 +78,14 @@ class DashboardView(ctk.CTkFrame):
         ]
         
         for i, (label, value) in enumerate(stat_items):
-            card = ctk.CTkFrame(stats_frame, corner_radius=15)
+            card = ctk.CTkFrame(stats_frame, corner_radius=15, fg_color=COLORS['button'])
             card.grid(row=0, column=i, padx=10, sticky="nsew")
             
             value_label = ctk.CTkLabel(
                 card,
                 text=str(value),
-                font=('Helvetica', 32, 'bold')
+                font=('Helvetica', 32, 'bold'),
+                text_color=COLORS['button_text']
             )
             value_label.grid(row=0, column=0, padx=20, pady=(15, 5))
             
@@ -92,7 +93,7 @@ class DashboardView(ctk.CTkFrame):
                 card,
                 text=label,
                 font=FONTS['body'],
-                text_color=COLORS['text_secondary']
+                text_color=COLORS['button_text']
             )
             label_label.grid(row=1, column=0, padx=20, pady=(0, 15))
     
@@ -165,7 +166,7 @@ class DashboardView(ctk.CTkFrame):
             project: The project object to display
             index: The row index for grid positioning
         """
-        item = ctk.CTkFrame(self.projects_container, corner_radius=10)
+        item = ctk.CTkFrame(self.projects_container, corner_radius=10, fg_color=COLORS['surface'])
         item.grid(row=index, column=0, sticky="ew", pady=5)
         item.grid_columnconfigure(0, weight=1)
         
@@ -173,7 +174,8 @@ class DashboardView(ctk.CTkFrame):
         name_label = ctk.CTkLabel(
             item,
             text=project.project_name,
-            font=FONTS['subheading']
+            font=FONTS['subheading'],
+            text_color=COLORS['text']
         )
         name_label.grid(row=0, column=0, padx=15, pady=(10, 0), sticky="w")
         
@@ -205,4 +207,3 @@ class DashboardView(ctk.CTkFrame):
                 text_color=COLORS['text_secondary']
             )
             details_label.grid(row=2, column=0, padx=15, pady=(0, 10), sticky="w")
-            
