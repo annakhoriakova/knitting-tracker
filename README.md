@@ -9,7 +9,17 @@ knitting-tracker/
 │   ├── __init__.py
 │   ├── database.py          # Database connection & setup
 │   ├── models.py            # Data classes
-│   └── crud.py              # CRUD operations
+│   ├── crud.py              # CRUD operations
+│   └── gui/
+│       ├── __init__.py
+│       ├── dashboard.py    # Dashboard view
+│       ├── dialogs.py      # Dialog windows
+│       ├── main_window.py  # Main window
+│       ├── needles.py      # Needles management view
+│       ├── patterns.py     # Patterns management view
+│       ├── projects.py     # Projects management view
+│       ├── styles.py       # Styles and theme configuration
+│       ├── yarns.py        # Yarns management view
 │
 ├── tests/                   # Unit tests
 │   ├── __init__.py
