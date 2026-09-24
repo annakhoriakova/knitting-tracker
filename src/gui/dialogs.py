@@ -9,7 +9,7 @@ This module contains dialog windows for:
 - Creating and editing needles
 
 Author: Anna Khoriakova
-Last Updated: 2026-09-01
+Last Updated: 2026-09-23
 ============================================================
 """
 
@@ -18,8 +18,9 @@ from tkinter import messagebox
 from datetime import datetime
 from src.models import Project, Pattern, Needle, Yarn
 from src.gui.styles import (
-    FONTS, STATUS_ORDER, YARN_WEIGHTS, 
-    NEEDLE_TYPES, NEEDLE_MATERIALS, NEEDLE_LENGTHS
+    COLORS, FONTS, STATUS_ORDER, YARN_WEIGHTS,
+    NEEDLE_TYPES, NEEDLE_MATERIALS, NEEDLE_LENGTHS,
+    get_status_color, get_status_display
 )
 
 
@@ -35,6 +36,7 @@ class BaseDialog(ctk.CTkToplevel):
         self.title(title)
         self.geometry(f"{width}x{height}")
         self.resizable(False, False)
+        self.configure(fg_color=COLORS['background'])
         
         # Make it modal
         self.transient(parent)
@@ -77,14 +79,28 @@ class PatternDialog(BaseDialog):
         name_label = ctk.CTkLabel(main_frame, text="Pattern Name *", font=FONTS['body'])
         name_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
         
-        self.name_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Aran Sweater")
+        self.name_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., Aran Sweater",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.name_entry.grid(row=1, column=0, sticky="ew", pady=(0, 15))
         
         # Designer
         designer_label = ctk.CTkLabel(main_frame, text="Designer", font=FONTS['body'])
         designer_label.grid(row=2, column=0, sticky="w", pady=(0, 5))
         
-        self.designer_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Alice Starmore")
+        self.designer_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., Alice Starmore",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.designer_entry.grid(row=3, column=0, sticky="ew", pady=(0, 20))
         
         # Buttons
@@ -95,7 +111,10 @@ class PatternDialog(BaseDialog):
             button_frame,
             text="Cancel",
             command=self.cancel,
-            width=100
+            width=100,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         cancel_btn.grid(row=0, column=0, padx=5)
         
@@ -103,7 +122,10 @@ class PatternDialog(BaseDialog):
             button_frame,
             text="Save",
             command=self.save,
-            width=100
+            width=100,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         save_btn.grid(row=0, column=1, padx=5)
         
@@ -166,21 +188,42 @@ class YarnDialog(BaseDialog):
         brand_label = ctk.CTkLabel(main_frame, text="Brand *", font=FONTS['body'])
         brand_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
         
-        self.brand_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Malabrigo")
+        self.brand_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., Malabrigo",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.brand_entry.grid(row=1, column=0, sticky="ew", pady=(0, 15))
         
         # Yarn Line
         line_label = ctk.CTkLabel(main_frame, text="Line/Product Name", font=FONTS['body'])
         line_label.grid(row=2, column=0, sticky="w", pady=(0, 5))
         
-        self.line_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Rios")
+        self.line_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., Rios",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.line_entry.grid(row=3, column=0, sticky="ew", pady=(0, 15))
         
         # Color Name
         color_label = ctk.CTkLabel(main_frame, text="Color Name", font=FONTS['body'])
         color_label.grid(row=4, column=0, sticky="w", pady=(0, 5))
         
-        self.color_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Whale's Road")
+        self.color_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., Whale's Road",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.color_entry.grid(row=5, column=0, sticky="ew", pady=(0, 15))
         
         # Weight Category
@@ -191,6 +234,14 @@ class YarnDialog(BaseDialog):
             main_frame,
             values=YARN_WEIGHTS,
             width=200
+        ,
+            fg_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark'],
+            text_color=COLORS['button_text'],
+            dropdown_fg_color=COLORS['surface'],
+            dropdown_text_color=COLORS['text'],
+            dropdown_hover_color=COLORS['button']
         )
         self.weight_menu.grid(row=7, column=0, sticky="ew", pady=(0, 15))
         self.weight_menu.set("Select weight...")
@@ -199,14 +250,28 @@ class YarnDialog(BaseDialog):
         yardage_label = ctk.CTkLabel(main_frame, text="Total Yardage (yards per skein)", font=FONTS['body'])
         yardage_label.grid(row=8, column=0, sticky="w", pady=(0, 5))
         
-        self.yardage_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., 210")
+        self.yardage_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., 210",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.yardage_entry.grid(row=9, column=0, sticky="ew", pady=(0, 15))
         
         # Dye Lot
         dyelot_label = ctk.CTkLabel(main_frame, text="Dye Lot", font=FONTS['body'])
         dyelot_label.grid(row=10, column=0, sticky="w", pady=(0, 5))
         
-        self.dyelot_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., 12345")
+        self.dyelot_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., 12345",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.dyelot_entry.grid(row=11, column=0, sticky="ew", pady=(0, 20))
         
         # Buttons
@@ -217,7 +282,10 @@ class YarnDialog(BaseDialog):
             button_frame,
             text="Cancel",
             command=self.cancel,
-            width=100
+            width=100,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         cancel_btn.grid(row=0, column=0, padx=5)
         
@@ -225,7 +293,10 @@ class YarnDialog(BaseDialog):
             button_frame,
             text="Save",
             command=self.save,
-            width=100
+            width=100,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         save_btn.grid(row=0, column=1, padx=5)
         
@@ -320,7 +391,14 @@ class NeedleDialog(BaseDialog):
         size_label = ctk.CTkLabel(main_frame, text="Needle Size (mm) *", font=FONTS['body'])
         size_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
         
-        self.size_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., 4.0")
+        self.size_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., 4.0",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.size_entry.grid(row=1, column=0, sticky="ew", pady=(0, 15))
         
         # Needle Type
@@ -331,6 +409,14 @@ class NeedleDialog(BaseDialog):
             main_frame,
             values=NEEDLE_TYPES,
             width=200
+        ,
+            fg_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark'],
+            text_color=COLORS['button_text'],
+            dropdown_fg_color=COLORS['surface'],
+            dropdown_text_color=COLORS['text'],
+            dropdown_hover_color=COLORS['button']
         )
         self.type_menu.grid(row=3, column=0, sticky="ew", pady=(0, 15))
         self.type_menu.set("Select type...")
@@ -339,7 +425,14 @@ class NeedleDialog(BaseDialog):
         brand_label = ctk.CTkLabel(main_frame, text="Brand", font=FONTS['body'])
         brand_label.grid(row=4, column=0, sticky="w", pady=(0, 5))
         
-        self.brand_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., KnitPro")
+        self.brand_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., KnitPro",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.brand_entry.grid(row=5, column=0, sticky="ew", pady=(0, 15))
         
         # Needle Material
@@ -350,6 +443,14 @@ class NeedleDialog(BaseDialog):
             main_frame,
             values=NEEDLE_MATERIALS,
             width=200
+        ,
+            fg_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark'],
+            text_color=COLORS['button_text'],
+            dropdown_fg_color=COLORS['surface'],
+            dropdown_text_color=COLORS['text'],
+            dropdown_hover_color=COLORS['button']
         )
         self.material_menu.grid(row=7, column=0, sticky="ew", pady=(0, 15))
         self.material_menu.set("Select material...")
@@ -362,6 +463,14 @@ class NeedleDialog(BaseDialog):
             main_frame,
             values=NEEDLE_LENGTHS,
             width=200
+        ,
+            fg_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark'],
+            text_color=COLORS['button_text'],
+            dropdown_fg_color=COLORS['surface'],
+            dropdown_text_color=COLORS['text'],
+            dropdown_hover_color=COLORS['button']
         )
         self.length_menu.grid(row=9, column=0, sticky="ew", pady=(0, 20))
         self.length_menu.set("Select length...")
@@ -374,7 +483,10 @@ class NeedleDialog(BaseDialog):
             button_frame,
             text="Cancel",
             command=self.cancel,
-            width=100
+            width=100,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         cancel_btn.grid(row=0, column=0, padx=5)
         
@@ -382,7 +494,10 @@ class NeedleDialog(BaseDialog):
             button_frame,
             text="Save",
             command=self.save,
-            width=100
+            width=100,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         save_btn.grid(row=0, column=1, padx=5)
         
@@ -479,7 +594,14 @@ class ProjectDialog(BaseDialog):
         name_label = ctk.CTkLabel(main_frame, text="Project Name *", font=FONTS['body'])
         name_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
         
-        self.name_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., My Aran Sweater")
+        self.name_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., My Aran Sweater",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.name_entry.grid(row=1, column=0, sticky="ew", pady=(0, 15))
         
         # Pattern selection
@@ -495,6 +617,14 @@ class ProjectDialog(BaseDialog):
             main_frame,
             values=pattern_names,
             width=200
+        ,
+            fg_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark'],
+            text_color=COLORS['button_text'],
+            dropdown_fg_color=COLORS['surface'],
+            dropdown_text_color=COLORS['text'],
+            dropdown_hover_color=COLORS['button']
         )
         self.pattern_menu.grid(row=3, column=0, sticky="ew", pady=(0, 15))
         self.patterns = patterns
@@ -512,6 +642,14 @@ class ProjectDialog(BaseDialog):
             main_frame,
             values=needle_names,
             width=200
+        ,
+            fg_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark'],
+            text_color=COLORS['button_text'],
+            dropdown_fg_color=COLORS['surface'],
+            dropdown_text_color=COLORS['text'],
+            dropdown_hover_color=COLORS['button']
         )
         self.needle_menu.grid(row=5, column=0, sticky="ew", pady=(0, 15))
         self.needles = needles
@@ -524,6 +662,14 @@ class ProjectDialog(BaseDialog):
             main_frame,
             values=STATUS_ORDER,
             width=200
+        ,
+            fg_color=COLORS['button'],
+            button_color=COLORS['button_hover'],
+            button_hover_color=COLORS['primary_dark'],
+            text_color=COLORS['button_text'],
+            dropdown_fg_color=COLORS['surface'],
+            dropdown_text_color=COLORS['text'],
+            dropdown_hover_color=COLORS['button']
         )
         self.status_menu.grid(row=7, column=0, sticky="ew", pady=(0, 15))
         self.status_menu.set("Planning")
@@ -532,7 +678,14 @@ class ProjectDialog(BaseDialog):
         recipient_label = ctk.CTkLabel(main_frame, text="Recipient", font=FONTS['body'])
         recipient_label.grid(row=8, column=0, sticky="w", pady=(0, 5))
         
-        self.recipient_entry = ctk.CTkEntry(main_frame, placeholder_text="e.g., Me, Gift, or name")
+        self.recipient_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="e.g., Me, Gift, or name",
+            fg_color=COLORS['button'],
+            text_color=COLORS['button_text'],
+            placeholder_text_color=COLORS['placeholder'],
+            border_color=COLORS['border']
+        )
         self.recipient_entry.grid(row=9, column=0, sticky="ew", pady=(0, 15))
         
         # Start Date
@@ -553,7 +706,10 @@ class ProjectDialog(BaseDialog):
             button_frame,
             text="Cancel",
             command=self.cancel,
-            width=100
+            width=100,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         cancel_btn.grid(row=0, column=0, padx=5)
         
@@ -561,7 +717,10 @@ class ProjectDialog(BaseDialog):
             button_frame,
             text="Save",
             command=self.save,
-            width=100
+            width=100,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
         )
         save_btn.grid(row=0, column=1, padx=5)
         
@@ -674,3 +833,137 @@ class ProjectDialog(BaseDialog):
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save project: {str(e)}")
             
+
+# ============================================================
+# PROJECT DETAIL DIALOG (read-only)
+# ============================================================
+
+class ProjectDetailDialog(BaseDialog):
+    """Read-only dialog showing the full details of a project."""
+
+    def __init__(self, parent, tracker, project):
+        self.tracker = tracker
+        # Re-fetch so we get the yarns list too (the list view's Project
+        # objects don't carry yarns - only tracker.get_project() does).
+        self.project = tracker.get_project(project.project_id) or project
+        super().__init__(parent, "Project Details", width=550, height=600)
+        self.create_content()
+
+    def create_content(self):
+        """Build the read-only detail view."""
+        main_frame = ctk.CTkFrame(self, fg_color="transparent")
+        main_frame.pack(fill="both", expand=True, padx=30, pady=20)
+
+        scroll = ctk.CTkScrollableFrame(main_frame, fg_color="transparent")
+        scroll.pack(fill="both", expand=True)
+        scroll.grid_columnconfigure(0, weight=1)
+
+        self._row = 0
+
+        def add_field(label_text, value_text):
+            lbl = ctk.CTkLabel(
+                scroll, text=label_text, font=FONTS['body'],
+                text_color=COLORS['text_secondary']
+            )
+            lbl.grid(row=self._row, column=0, sticky="w", pady=(10, 0))
+            self._row += 1
+            val = ctk.CTkLabel(
+                scroll, text=value_text or "—", font=FONTS['body_large'],
+                text_color=COLORS['text'], wraplength=440, justify="left"
+            )
+            val.grid(row=self._row, column=0, sticky="w")
+            self._row += 1
+
+        # Project name (title)
+        title_label = ctk.CTkLabel(
+            scroll, text=self.project.project_name, font=FONTS['title'],
+            text_color=COLORS['text'], wraplength=440, justify="left"
+        )
+        title_label.grid(row=self._row, column=0, sticky="w", pady=(0, 5))
+        self._row += 1
+
+        status_label = ctk.CTkLabel(
+            scroll,
+            text=get_status_display(self.project.status),
+            font=FONTS['heading'],
+            text_color=get_status_color(self.project.status)
+        )
+        status_label.grid(row=self._row, column=0, sticky="w", pady=(0, 10))
+        self._row += 1
+
+        add_field("Recipient", self.project.recipient)
+        add_field("Start Date", self.project.start_date)
+        add_field("End Date", self.project.end_date)
+
+        # Pattern
+        pattern = self.tracker.get_pattern(self.project.pattern_id)
+        if pattern:
+            pattern_text = pattern.pattern_name
+            if pattern.designer:
+                pattern_text += f" by {pattern.designer}"
+        else:
+            pattern_text = None
+        add_field("Pattern", pattern_text)
+
+        # Primary needle
+        needle = next(
+            (n for n in self.tracker.get_all_needles()
+             if n.needle_id == self.project.needle_id),
+            None
+        )
+        if needle:
+            needle_parts = [f"{needle.needle_size_mm}mm {needle.needle_type}"]
+            if needle.needle_brand:
+                needle_parts.append(needle.needle_brand)
+            if needle.needle_material:
+                needle_parts.append(needle.needle_material)
+            if needle.needle_length:
+                needle_parts.append(f'{needle.needle_length}"')
+            needle_text = " | ".join(needle_parts)
+        else:
+            needle_text = None
+        add_field("Primary Needle", needle_text)
+
+        # Yarns
+        yarns_header = ctk.CTkLabel(
+            scroll, text="Yarns", font=FONTS['body'],
+            text_color=COLORS['text_secondary']
+        )
+        yarns_header.grid(row=self._row, column=0, sticky="w", pady=(10, 0))
+        self._row += 1
+
+        if self.project.yarns:
+            for y in self.project.yarns:
+                line = y['yarn_brand']
+                if y.get('yarn_line'):
+                    line += f" - {y['yarn_line']}"
+                if y.get('color_name'):
+                    line += f" ({y['color_name']})"
+                skeins = y.get('skeins_used', 1)
+                line += f" — {skeins} skein{'s' if skeins != 1 else ''}"
+
+                yarn_label = ctk.CTkLabel(
+                    scroll, text=line, font=FONTS['body_large'],
+                    text_color=COLORS['text'], wraplength=440, justify="left"
+                )
+                yarn_label.grid(row=self._row, column=0, sticky="w", pady=(2, 0))
+                self._row += 1
+        else:
+            none_label = ctk.CTkLabel(
+                scroll, text="No yarns added to this project.",
+                font=FONTS['body_large'], text_color=COLORS['text_secondary']
+            )
+            none_label.grid(row=self._row, column=0, sticky="w")
+            self._row += 1
+
+        # Close button
+        close_btn = ctk.CTkButton(
+            main_frame,
+            text="Close",
+            command=self.cancel,
+            width=100,
+            fg_color=COLORS['button'],
+            hover_color=COLORS['button_hover'],
+            text_color=COLORS['button_text']
+        )
+        close_btn.pack(pady=(15, 0))
